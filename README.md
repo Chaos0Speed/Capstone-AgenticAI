@@ -58,6 +58,25 @@ This satisfies the assignment's four-pattern requirement (Supervisor) while nest
 
 ---
 
+## Setup
+
+```bash
+pip install langgraph langchain langchain-google-genai langchain-community \
+            sentence-transformers pdfplumber python-docx python-pptx \
+            icalendar google-api-python-client google-auth-httplib2 google-auth-oauthlib \
+            duckduckgo-search python-dotenv
+```
+
+1. Create a `.env` file with:
+   ```
+   GEMINI_API_KEY=your_key_here
+   ```
+2. Set up Google Calendar OAuth credentials and save the resulting token as `token.json` in the project root (scope: `https://www.googleapis.com/auth/calendar.events`).
+3. Place course material into `input_files/` (subfolders supported — used as filename prefixes to avoid collisions).
+4. Run the ingestion cells to populate `run_files/` and `descriptions.txt`.
+5. Run the graph via `run_app("your query here")`.
+
+---
 ## Agents & Nodes
 
 | Node | Role |
@@ -198,26 +217,6 @@ A single shared state object is used (rather than fully isolated per-agent scrat
 - **Web search fallback**: `DuckDuckGoSearchRun` (LangChain community tools)
 - **Calendar integration**: Google Calendar API (`google-api-python-client`, OAuth2 via `google-auth`)
 - **ICS handling**: `icalendar`
-
----
-
-## Setup
-
-```bash
-pip install langgraph langchain langchain-google-genai langchain-community \
-            sentence-transformers pdfplumber python-docx python-pptx \
-            icalendar google-api-python-client google-auth-httplib2 google-auth-oauthlib \
-            duckduckgo-search python-dotenv
-```
-
-1. Create a `.env` file with:
-   ```
-   GEMINI_API_KEY=your_key_here
-   ```
-2. Set up Google Calendar OAuth credentials and save the resulting token as `token.json` in the project root (scope: `https://www.googleapis.com/auth/calendar.events`).
-3. Place course material into `input_files/` (subfolders supported — used as filename prefixes to avoid collisions).
-4. Run the ingestion cells to populate `run_files/` and `descriptions.txt`.
-5. Run the graph via `run_app("your query here")`.
 
 ---
 
