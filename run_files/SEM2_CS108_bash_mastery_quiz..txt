@@ -1,0 +1,229 @@
+# Bash Mastery — Complete Conceptual Quiz
+
+## Shell Basics & Navigation
+
+### Q01: The shell is best described as what kind of program?
+- A) A program that compiles code into machine instructions - B) A hardware abstraction layer between CPU and memory - C) A command interpreter — it reads commands from the user or a script and executes them by communicating with the kernel - D) A graphical window manager
+
+### Q02: When you open a terminal and see a prompt, you are interacting with a shell in what mode?
+- A) Batch mode - B) Interactive mode — commands are entered and executed one at a time - C) Daemon mode - D) Subshell mode
+
+### Q03: What is the conceptual difference between an absolute path and a relative path?
+- A) Absolute paths use `./`; relative paths start with `/` - B) Absolute paths are shorter; relative paths are longer - C) Relative paths always start with `~`; absolute paths start from root - D) An absolute path uniquely identifies a file from the filesystem root `/`, regardless of where you are. A relative path is interpreted starting from the current working directory
+
+### Q04: What does the `~` (tilde) character represent in bash?
+- A) The current user's home directory — it's expanded by the shell before the command runs - B) The root directory `/` - C) The parent directory, same as `..` - D) A hidden file prefix
+
+### Q05: Why do hidden files in Linux start with a `.` (dot)? What actually makes them "hidden"?
+- A) The filesystem marks them with a special hidden attribute flag - B) The kernel hides them from all programs - C) It's purely a convention — `ls` and most tools skip files starting with `.` by default. There is no special filesystem attribute; `ls -a` shows them - D) Only root can read files starting with `.`
+
+### Q06: What does the `man` command give you, and why is it more useful than just searching the internet?
+- A) Manual pages are shorter summaries; internet has full documentation - B) `man` shows the authoritative manual page for the exact version installed on your system — flags, behaviour, and semantics are guaranteed to match what your system actually does - C) It shows the source code of the command - D) It requires internet access to fetch documentation
+
+### Q07: What is glob expansion (wildcards) and who actually performs it — the command or the shell?
+- A) The command itself expands `*` and `?` by reading the directory - B) The kernel expands wildcards before passing them to any program - C) The terminal emulator expands globs before sending input to the shell - D) The shell expands globs before the command ever runs — `rm *.txt` means the shell replaces `*.txt` with matching filenames, then passes that list to `rm`
+
+## Files, Directories & Permissions
+
+### Q08: In Linux, what is the fundamental principle "everything is a file" really saying?
+- A) All data is stored in files with .txt extension - B) Devices, pipes, sockets, and processes are all represented as file descriptors — you interact with hardware (like a keyboard) the same way you read a regular file - C) Only text files exist; binary files are converted on the fly - D) Every object in Linux has a .file extension internally
+
+### Q09: File permissions in Linux are expressed as three groups (user, group, others). What is the conceptual reason for this three-tier model?
+- A) To support read, write, and execute separately - B) It's a legacy limitation from early Unix with 9-bit permission fields - C) It models three natural access domains: the file's owner, members of a shared group (e.g., a project team), and everyone else — allowing fine-grained sharing without exposing files to all users - D) To differentiate between root, sudo users, and normal users
+
+### Q10: What does the execute (x) permission mean on a directory (as opposed to a file)?
+- A) It means you can enter the directory (cd into it) and access its contents. Without `x`, you can't traverse the directory even if you know the filenames inside - B) It means you can run the directory as a script - C) It means you can list the directory's contents with `ls` - D) It has no meaning on directories; only files need execute permission
+
+### Q11: What is a hard link and how does it differ conceptually from a symbolic (soft) link?
+- A) Hard links are copies of the file; symbolic links are aliases - B) Hard links can cross filesystems; symbolic links cannot - C) Symbolic links are permanent; hard links expire - D) A hard link is another directory entry pointing to the same inode (same data). A symlink is a file that contains a path string — it points to a name, not the data. Deleting the original breaks a symlink but not a hard link
+
+### Q12: What does `umask` do? If the default umask is 022, what permissions does a newly created file get (assuming the system default is 666)?
+- A) umask sets the minimum permissions; new files get 022 permissions - B) umask is a mask of permissions to remove. 666 minus 022 = 644, so new files get `rw-r--r--`. The umask bits are subtracted (ANDed with the complement) from the default - C) umask adds permissions on top of the base; 666 + 022 = 777 - D) umask only affects executable files, not regular files
+
+### Q13: What is an inode and what information does it store?
+- A) An inode stores the filename and the file's content - B) An inode is a block of the file's actual data - C) An inode is a data structure storing file metadata (permissions, owner, timestamps, size, data block pointers) — but NOT the filename. Filenames live in directory entries that point to inodes - D) An inode is only used for directories, not regular files
+
+### Q14: Why does `rm -rf /` require `--no-preserve-root` on modern systems? What does this reveal about how `rm` works?
+- A) Modern `rm` has a built-in guard specifically for `/`. This reveals that `rm -rf` is recursively called per-directory — without the guard, it would delete the entire filesystem tree starting from root - B) The kernel prevents any program from deleting `/` directly - C) You need root permissions to delete `/`, and adding the flag grants them - D) `rm` requires confirmation for files larger than 1GB
+
+## Redirections, Pipes & File Descriptors
+
+### Q15: What are the three standard file descriptors and what are their default connections?
+- A) fd0=output, fd1=input, fd2=log - B) fd0=stdin (keyboard by default), fd1=stdout (terminal), fd2=stderr (terminal) — every process inherits these three open file descriptors - C) fd1=stdin, fd2=stdout, fd3=stderr - D) They are named stdin/stdout/stderr and have no numeric identifiers
+
+### Q16: A pipe (|) connects two processes. What exactly does it connect between them?
+- A) It connects the files of the first command to the second - B) It connects the second command's stdout to the first command's stdin - C) Both commands share the same memory space - D) It connects the stdout of the left command to the stdin of the right command — via an in-kernel buffer. Both processes run concurrently; the right command consumes data as the left produces it
+
+### Q17: What is the conceptual difference between `>` and `>>`?
+- A) `>>` is faster because it doesn't seek to the beginning - B) `>` creates the file only if it doesn't exist; `>>` always creates it - C) `>` opens the file with truncation (empties it first, then writes). `>>` opens with append mode (seeks to the end, preserving existing content). Both create the file if absent - D) They are identical; the extra `>` just makes it more readable
+
+### Q18: In `cmd > out.txt 2>&1`, why does the order matter? What would `cmd 2>&1 > out.txt` do instead?
+- A) Redirections are processed left-to-right. `> out.txt 2>&1`: first stdout→file, then stderr→stdout (which is now the file) — both go to file. `2>&1 > out.txt`: first stderr→stdout (terminal), then stdout→file — stderr still goes to terminal - B) The order doesn't matter; both are equivalent - C) `2>&1` must always come first to take effect - D) The second form sends both to /dev/null
+
+### Q19: What is `/dev/null` and why is it useful in shell scripting?
+- A) A temporary file that auto-deletes on reboot - B) A special device file that discards everything written to it and returns EOF when read. Used to silence unwanted output: `cmd 2>/dev/null` suppresses errors - C) A network null device for testing connections - D) A directory where deleted files go before permanent deletion
+
+### Q20: What is a here-document (<<EOF) and what problem does it solve?
+- A) It reads from a file named EOF in the current directory - B) It sends the output of a command back into itself - C) It creates a temporary file named EOF automatically - D) It embeds multi-line text inline in a script as stdin for a command — solving the problem of needing to pass a block of text to a command (e.g., `cat`, `ssh`, `mysql`) without creating a separate file
+
+### Q21: What is process substitution (<(cmd)) and when would you use it instead of a pipe?
+- A) It substitutes one process for another in the process table - B) It runs a command as a background process - C) It makes a command's output appear as a file (via a named pipe or /proc/fd path). Used when a command requires a filename argument, not stdin — e.g., `diff <(sort a.txt) <(sort b.txt)` - D) It's identical to command substitution `$(cmd)`
+
+### Q22: Why does a variable set inside a pipeline subshell not affect the parent shell? For example, why does `x=0; echo "1" | read x; echo $x` print 0?
+- A) Each command in a pipeline runs in its own subshell (a forked child process). Variable assignments in a subshell don't propagate back to the parent. The `read x` sets x only in the subshell, which then exits - B) `read` doesn't work with pipes; you must use command substitution - C) The pipe discards the value before read can capture it - D) Pipelines always run sequentially, so the variable hasn't been set yet when echo runs
+
+## Variables, Quoting & Expansion
+
+### Q23: Why must there be no spaces around `=` in bash variable assignment (x=5)?
+- A) It's just style convention; spaces work fine - B) The shell uses spaces for tab completion - C) The shell parses commands by splitting on whitespace. `x = 5` would be parsed as the command `x` with arguments `=` and `5` — a command call, not an assignment - D) Only integer variables can use spaces; string variables cannot
+
+### Q24: What is the fundamental difference between single quotes ('...') and double quotes ("...") in bash?
+- A) Single quotes are for numbers; double quotes are for strings - B) Single quotes are completely literal — no expansion of any kind occurs inside them. Double quotes allow variable ($var), command ($(cmd)), and arithmetic expansion, but prevent word splitting and globbing - C) Double quotes prevent all expansion; single quotes allow variables - D) They are interchangeable in all practical cases
+
+### Q25: What is word splitting and why is "$var" safer than $var?
+- A) Word splitting splits long words to fit terminal width - B) Quoting prevents the variable from being evaluated - C) They are identical; double quotes have no effect on word splitting - D) After expansion, the shell splits unquoted results on IFS characters (space, tab, newline). If $var = "hello world", unquoted it becomes two arguments: `hello` and `world`. Quoting preserves it as one argument
+
+### Q26: What does `${var:-default}` do, and how is it different from `${var:=default}`?
+- A) `${var:-default}` returns "default" if var is unset/empty but does NOT assign it. `${var:=default}` returns "default" AND assigns it to var — so subsequent uses of $var also get "default" - B) They are identical — both return and assign the default - C) `:-` works for strings; `:=` works for integers - D) `:=` only works inside arithmetic expressions
+
+### Q27: What is the difference between $(command) and backtick command substitution?
+- A) Backticks are faster; $() is slower but more modern - B) They produce different whitespace handling of the output - C) Both capture command output, but $() is nestable ($(echo $(ls))) and easier to read. Backticks require escaping backslashes in nested cases. $() is the modern preferred form - D) Backticks expand variables; $() does not
+
+### Q28: What does `${#var}` give you, and what does `${var:2:4}` do?
+- A) `${#var}` = number of characters to remove; `${var:2:4}` = remove 2 chars from position 4 - B) `${#var}` = ASCII value of first character; `${var:2:4}` = characters 2 through 4 - C) Both perform arithmetic operations on the variable - D) `${#var}` = the length (number of characters) of the string. `${var:2:4}` = a substring starting at offset 2, taking 4 characters. E.g., if var="hello", result is "ello"… wait, offset 2, length 4 = "llo" + … = "llo" (3 chars from offset 2)
+
+### Q29: What does `export VAR` do that plain `VAR=value` does not?
+- A) `export` makes the variable read-only - B) `export` marks the variable for inclusion in the environment of child processes. Without export, a variable exists only in the current shell and isn't passed to subprocesses or scripts you run - C) `export` saves the variable to disk permanently across sessions - D) `export` converts the variable to a global constant
+
+### Q30: What is IFS and what happens if you set it to a colon (:)?
+- A) IFS is the "Input File Separator" and only affects `cut` commands - B) IFS = Internal Flag System, it changes how variables are declared - C) IFS = Internal Field Separator. It determines how bash splits words after expansion. Setting `IFS=:` makes bash split on colons — e.g., `for p in $PATH` would iterate each path element since PATH uses `:` as separator - D) IFS only affects the `read` built-in command
+
+### Q31: What is brace expansion and when is it expanded relative to other expansions?
+- A) Brace expansion ({a,b,c} or {1..5}) generates multiple strings and happens first, before variable expansion, globbing, or any other expansion — it's purely textual - B) Brace expansion happens last, after glob expansion - C) Brace expansion only works inside arithmetic contexts $((...)) - D) Brace expansion can contain variable references which are expanded first
+
+## Control Flow
+
+### Q32: In bash, what is an "exit code" and why does `if` use it rather than a boolean value?
+- A) Exit codes are boolean: 0=false, 1=true - B) Exit codes are only for error reporting, not for conditionals - C) `if` only works with the `[` test command, not exit codes - D) An exit code is the integer a process returns when it exits (0=success, non-zero=failure). `if` runs any command and checks its exit code — 0 means the condition is true. This makes `if grep ...` work naturally alongside `if [ ... ]`
+
+### Q33: What is the difference between `[ ]` and `[[ ]]` for tests in bash?
+- A) `[[ ]]` is just `[ ]` with double brackets for style; they behave identically - B) `[ ]` is a POSIX command (external or built-in) that uses traditional test operators. `[[ ]]` is a bash keyword with enhanced features: pattern matching with `=~` and `==`, no word-splitting on variables, logical `&&`/`||` without quoting issues - C) `[ ]` is for strings only; `[[ ]]` is for arithmetic - D) `[[ ]]` requires quotes around all variables; `[ ]` does not
+
+### Q34: What does `&&` mean between two commands, and how is it different from a semicolon (;)?
+- A) Both run commands sequentially; `&&` just adds a visual separator - B) `&&` runs commands in parallel; `;` runs them sequentially - C) `cmd1 && cmd2`: run cmd2 only if cmd1 succeeds (exit 0). `cmd1 ; cmd2`: always run both regardless of exit status. `&&` is short-circuit AND evaluation - D) `&&` is bitwise AND of exit codes; `;` adds them
+
+### Q35: Predict the output:
+```bash x=5 case $x in 1|2) echo "low" ;; 3|4) echo "mid" ;; *) echo "high" ;; esac ``` - A) high - B) mid - C) low - D) Error — case requires numeric comparison flags
+
+### Q36: What is the conceptual difference between `while` and `until` loops?
+- A) `while` runs once; `until` runs multiple times - B) `while` runs as long as the condition is true (exit 0). `until` runs as long as the condition is false (non-zero exit) — it's logically `while not` - C) `until` is just older syntax; they are functionally the same - D) `until` requires a counter variable; `while` does not
+
+### Q37: What does `break 2` do inside nested loops?
+- A) Breaks the loop and waits 2 seconds - B) Breaks the loop twice (runs break two times) - C) Skips 2 iterations before breaking - D) Breaks out of 2 levels of nesting — i.e., it exits both the inner and outer loop, not just the innermost one
+
+### Q38: What is the output of this script?
+```bash for i in {1..3}; do if [ $i -eq 2 ]; then continue fi echo $i done ``` - A) 1 2 3 - B) 1 3 and then an error - C) 1 then 3 (on separate lines) — 2 is skipped by continue - D) 2 only
+
+### Q39: What does this idiom do? `[ -f config.txt ] || { echo "Missing config"; exit 1; }` - A) If config.txt does not exist as a regular file, print an error and exit. The `||` (OR) runs the right side only when the left side fails — a guard pattern - B) If config.txt exists, print "Missing config" and exit - C) Create config.txt if it doesn't exist, then exit - D) Always exits with status 1
+
+### Q40: What is the `select` statement in bash and what is it used for?
+- A) It selects random elements from an array - B) It generates a numbered interactive menu from a list and stores the user's choice in a variable — used for building simple terminal menus in scripts - C) It selects the fastest available shell to run a script - D) It selects columns from structured data, similar to `cut`
+
+### Q41: What does arithmetic expansion $(( )) do differently from the `let` command?
+- A) `let` works with floats; $(( )) is integers only - B) They are completely identical in all situations - C) $(( )) only works inside strings; `let` works standalone - D) $(( expr )) expands to the result value (substitution) — useful anywhere you need the number. `let` assigns to a variable and returns an exit code (non-zero if the result is 0). $(( )) is more composable
+
+### Q42: A script has `set -e` at the top. Inside a function, a command fails. What happens?
+- A) The function retries the failing command 3 times - B) `set -e` only affects the top-level script, not functions - C) The entire script exits immediately when the command fails — `set -e` applies to functions too. The exception is commands in conditions (if cmd, cmd ||, cmd &&) which are exempt from errexit - D) The function exits but the script continues
+
+## Functions & Scope
+
+### Q43: How does a bash function return a value to the caller? What does `return 5` actually do?
+- A) `return 5` sends the integer 5 back as a value the caller can read directly - B) `return N` sets only the exit code (0–255). To return a real value, the function prints it to stdout and the caller captures it with `result=$(my_func)` - C) Functions can't return values; only global variables can be used - D) `return` passes a string back to the caller via `$REPLY`
+
+### Q44: What does `local` do inside a bash function? What happens if you omit it?
+- A) `local` makes the variable persistent across script runs - B) `local` makes the variable read-only within the function - C) Omitting `local` causes an error if a global variable has the same name - D) `local` scopes the variable to the function — it disappears when the function returns. Without `local`, a variable assignment inside a function modifies (or creates) a global variable, which can cause subtle bugs
+
+### Q45: Inside a bash function, what do $1, $2, $@ refer to?
+- A) They refer to the function's own arguments (what was passed when the function was called), not the script's arguments - B) They always refer to the script's command-line arguments - C) They are undefined inside functions - D) They refer to the last command's arguments
+
+### Q46: What is the difference between "$@" and "$*" when passing arguments?
+- A) They are identical in all contexts - B) "$*" passes each argument separately; "$@" concatenates them - C) "$@" expands to each argument as a separate, properly quoted word — safe for passing to other commands. "$*" joins all arguments into one string with IFS separator — arguments with spaces lose their boundaries - D) "$*" includes the script name as the first element; "$@" does not
+
+### Q47: What does `source` (or .) do differently from running a script with `bash script.sh`?
+- A) `source` runs the script faster by caching it - B) `source` runs the script in the current shell process — all variable assignments, function definitions, and `cd` commands persist after it finishes. `bash script.sh` forks a new process; nothing leaks back to the parent - C) `source` requires the script to be executable; `bash` does not - D) They are identical; `source` is just an alias for `bash`
+
+### Q48: Can bash functions be recursive? What is the risk?
+- A) No — bash explicitly forbids recursive function calls - B) Yes, but only if the function is declared with `recursive` keyword - C) Yes, and there is no risk — bash handles infinite recursion gracefully - D) Yes, bash functions can call themselves. The risk is a stack overflow — bash allocates stack memory per call, and infinite (or very deep) recursion will exhaust it and crash the script
+
+## Text Processing
+
+### Q49: What is the conceptual difference between `grep`, `sed`, and `awk`?
+- A) They are all identical text search tools with different syntax - B) `grep` edits files; `sed` searches; `awk` compresses - C) `grep` = filter lines by pattern. `sed` = stream editor — transform text (substitutions, deletions, insertions). `awk` = field-aware programming language — process structured columns, aggregations, conditionals on each record - D) `awk` only works with CSV; `sed` only with plain text; `grep` with any format
+
+### Q50: What does `grep -v` do and what does `grep -c` do?
+- A) `-v` inverts the match (prints lines that do NOT match). `-c` counts the number of matching lines instead of printing them - B) `-v` enables verbose mode; `-c` enables case-insensitive matching - C) `-v` prints the version; `-c` searches recursively - D) Both do the same — match and print lines
+
+### Q51: In `sed 's/old/new/g'`, what does the `g` flag do and what happens without it?
+- A) `g` = global file mode (apply to all files); without it, only the first file is processed - B) `g` = replace all occurrences on each line. Without `g`, only the first occurrence per line is replaced — so a line with multiple "old" would have only the leftmost one changed - C) `g` = case-insensitive matching - D) `g` enables regex; without it, sed uses literal matching
+
+### Q52: In awk, what do NR, NF, $0, and $1 represent?
+- A) NR=number of regex matches, NF=next file, $0=current match, $1=first match group - B) NR=null record, NF=null field, $0=empty, $1=first character - C) They are all equivalent to line numbers - D) NR=current record (line) number. NF=number of fields on the current line. $0=entire current line. $1=first field (column 1). Fields split on FS (default: whitespace)
+
+### Q53: What does `sort -k2 -n` do, and what does `-u` add?
+- A) Sort by 2 keys alphabetically; `-u` sorts in reverse - B) Sort using 2 processes in parallel; `-u` uses Unicode sorting - C) `-k2` = sort by the 2nd whitespace-separated field. `-n` = numeric sort (so "10" comes after "9", not before). Adding `-u` removes duplicate lines after sorting - D) Sort field 2 with negative numbers first; `-u` shows only unique fields
+
+### Q54: What is the difference between `uniq` and `sort -u`?
+- A) `uniq` only removes adjacent duplicate lines — so it requires sorted input to deduplicate fully. `sort -u` sorts AND deduplicates in one step, handling non-adjacent duplicates too - B) They are completely identical - C) `uniq` is faster because it doesn't sort; `sort -u` is slower but more accurate - D) `sort -u` only removes exact duplicates; `uniq` uses fuzzy matching
+
+### Q55: What does `xargs` solve that a simple pipe cannot?
+- A) `xargs` processes files in parallel; pipes are sequential - B) Many commands don't read from stdin — they take arguments. `xargs` converts stdin lines into command-line arguments. Also, it batches many inputs into fewer command invocations (avoiding "argument list too long" errors with `rm *.txt`) - C) `xargs` only works with the `find` command - D) `xargs` is just an alias for a `while read` loop
+
+### Q56: What does `tee` do, and why is it useful in a pipeline?
+- A) `tee` duplicates a process into two parallel threads - B) `tee` merges two input streams into one - C) `tee` is used for debugging and logs the pipeline duration - D) `tee` reads stdin and writes to both stdout AND a file simultaneously — like a T-junction in a pipe. Useful to save intermediate results while the pipeline continues: `cmd | tee log.txt | next_cmd`
+
+## Processes & Jobs
+
+### Q57: What is the difference between a process and a job in bash?
+- A) They are the same thing — different names for the same concept - B) A process is a kernel-level running program (has a PID). A job is the shell's concept of a pipeline or command that was launched — the shell tracks jobs with job IDs (%1, %2) for use with `fg`, `bg`, `kill` - C) Jobs are background processes; processes only run in the foreground - D) Processes have names; jobs have numbers
+
+### Q58: What happens when you press `Ctrl+Z` and what does `bg` then do?
+- A) `Ctrl+Z` kills the process; `bg` starts a new one - B) `Ctrl+Z` sends SIGKILL; `bg` restores the process - C) `Ctrl+Z` sends SIGTSTP which suspends (pauses) the foreground process — it's still alive but not running. `bg` resumes it running in the background so the terminal is freed - D) `Ctrl+Z` undoes the last command; `bg` is for background scripts only
+
+### Q59: What is the difference between `kill -9` and `kill -15` (or just `kill`)?
+- A) SIGTERM (15) is the polite signal — the process can catch it, clean up, and exit gracefully. SIGKILL (9) cannot be caught or ignored — the kernel immediately terminates the process. Always try SIGTERM first - B) SIGKILL (9) is polite; SIGTERM (15) is forceful - C) The numbers are port numbers, not signal IDs - D) Both do the same; the number is just a priority hint
+
+### Q60: What does `nohup cmd &` accomplish, and why are both parts needed?
+- A) `nohup` gives the process more CPU priority; `&` runs it twice - B) `nohup` alone is sufficient to keep a process running after logout - C) `&` prevents the hangup signal; `nohup` puts it in background - D) `&` runs it in the background (non-blocking). `nohup` makes it immune to SIGHUP — the signal sent when you close the terminal. Without `nohup`, backgrounded processes die when you log out
+
+### Q61: What does `wait` do in a bash script that launches background processes?
+- A) `wait` pauses the script for a specified number of seconds - B) `wait` blocks the script until all background child processes finish. `wait $PID` waits for a specific process. It also captures the exit code of the waited process via `$?` - C) `wait` checks if background processes are running without blocking - D) `wait` sends a SIGSTOP to background processes
+
+### Q62: What does `trap 'cleanup' EXIT INT TERM` do in a script?
+- A) It prevents the script from exiting on those signals - B) It traps only the EXIT signal; INT and TERM are ignored - C) It registers `cleanup` as a handler to run when the script exits normally (EXIT), receives Ctrl+C (INT), or is terminated (TERM) — enabling reliable cleanup (temp file removal, lock release) regardless of how the script ends - D) It terminates the script immediately and calls cleanup
+
+## Scripting Patterns
+
+### Q63: Why should you use `set -euo pipefail` at the top of production scripts?
+- A) It improves performance by pre-compiling the script - B) It's required to enable all bash features - C) It just makes scripts run in strict POSIX mode - D) `-e`: exit on any command failure. `-u`: error on unset variables (catches typos). `-o pipefail`: a pipeline fails if ANY command in it fails (not just the last). Together they turn silent failures into loud, debuggable errors
+
+### Q64: What is the purpose of a lock file pattern in bash scripts?
+- A) To lock file permissions so the script can't be edited while running - B) To prevent two instances of the same script from running simultaneously. The script creates a file on start and checks for it — if it exists, another instance is running. Combined with `trap`, the file is removed on exit - C) To log which files the script has processed - D) To encrypt the script while it's running
+
+### Q65: Why should you use `mktemp` instead of hardcoding a temp filename like `/tmp/myfile.txt`?
+- A) `mktemp` creates a uniquely-named temp file atomically, preventing race conditions where two script instances clash, and preventing symlink attacks where a malicious user pre-creates `/tmp/myfile.txt` pointing somewhere dangerous - B) `mktemp` files are automatically deleted; hardcoded paths are not - C) It's just a style preference; both work identically - D) `mktemp` creates the file in RAM for faster access
+
+### Q66: What is wrong with this common pattern for reading file lines? `for line in $(cat file.txt); do` - A) Nothing — it's the correct way to read file lines - B) `cat` is not allowed inside command substitution - C) Word splitting on `$(cat)` splits on all whitespace (spaces, tabs, newlines) — a line with spaces becomes multiple loop iterations. The correct pattern is: `while IFS= read -r line; do ... done < file.txt` - D) The loop processes lines in random order
+
+### Q67: What does `shellcheck` do and why is it considered essential for bash scripting?
+- A) It formats bash scripts with consistent indentation - B) It compiles bash scripts to native binaries - C) It checks if bash is installed and updated - D) It's a static analysis tool that catches common bash bugs: unquoted variables, incorrect array usage, SC2 issues — things that silently fail at runtime. It's like a linter/compiler warning system for shell scripts
+
+## Advanced Bash
+
+### Q68: What is the difference between an indexed array and an associative array in bash, and how do you declare each?
+- A) Indexed arrays hold numbers only; associative arrays hold strings - B) Indexed arrays use integer indices (0, 1, 2, ...): `arr=(a b c)`. Associative arrays (bash 4+) use string keys like a dictionary: `declare -A map; map[key]="value"` - C) They are the same; the difference is just syntax sugar - D) Indexed arrays are for scripts; associative arrays are only for interactive use
+
+### Q69: What does `[[ $str =~ ^[0-9]+$ ]]` do and what makes regex matching in bash different from grep regex?
+- A) It tests if $str equals the string "^[0-9]+$" literally - B) It requires the regex to be in a separate file - C) It tests if $str matches the ERE pattern (here: only digits). Unlike grep, the regex is unquoted — quoting the pattern in bash's `=~` makes it a literal string match. Captures go into `${BASH_REMATCH[@]}` - D) The `=~` operator is not valid in bash; only in zsh
+
+### Q70: What is parameter substitution for pattern removal — what do `${var#pattern}`, `${var##pattern}`, `${var%pattern}`, and `${var%%pattern}` each do?
+- A) `#` removes shortest match from the front. `##` removes longest match from the front. `%` removes shortest match from the end. `%%` removes longest match from the end. E.g., if `f="path/to/file.txt"`, then `${f##*/}` = `file.txt` and `${f%.*}` = `path/to/file` - B) `#` and `%` both remove from the front; the double versions remove from the end - C) They are all equivalent — the extra characters just control matching speed - D) These only work on filenames stored in arrays

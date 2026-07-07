@@ -1,0 +1,82 @@
+# SOM101 Master Question Bank
+
+## Strategy & Planning
+
+* **Question:** A business unit operates in a declining industry with negative growth but holds a massive market share. Under the strict logic of the BCG Matrix, how is this unit classified?
+ * **Answer:** Cash Cow * **Rationale:** Cash Cows have high relative market share in low/declining growth industries. They generate excess cash to fund Stars or Question Marks.
+* **Question:** Which force in Porter’s Five Forces model is most directly impacted if a regulatory change suddenly eliminates all import tariffs in a historically protected domestic industry?
+ * **Answer:** Threat of New Entrants * **Rationale:** Removing tariffs instantly lowers barriers to entry, making it highly probable that foreign companies will enter the market.
+* **Question:** In the Balanced Scorecard framework, evaluating metrics like 'Employee Satisfaction', 'Retention', and 'Training Skills' falls under which specific perspective?
+ * **Answer:** Learning & Growth * **Rationale:** This perspective sustains the organization's ability to change, adapt, and improve by focusing on human capital.
+* **Question:** Which specific statement describes 'why an organization exists and what its overall current goal is'?
+ * **Answer:** Mission Statement * **Rationale:** A Mission focuses on the present ('What you do, How you do it, Why you do it'), while a Vision focuses on the aspirational future.
+* **Question:** In Porter's Five Forces, if buyers can easily compare prices online and switch to a competitor with zero financial penalty, which force is severely high?
+ * **Answer:** Bargaining Power of Buyers * **Rationale:** Low switching costs and high transparency heavily increase the power of the customer to dictate terms and push prices down.
+
+## Finance & Accounting
+
+* **Question:** A company decides to purchase a new warehouse to expand its distribution. This massive expenditure will provide LT benefits. What type of expense is this?
+ * **Answer:** Capital Expenditure (CAPEX) * **Rationale:** CAPEX involves spending on LT physical assets like buildings, factories, or machinery that benefit the company over several years.
+* **Question:** How does 'Economic Profit' conceptually differ from standard 'Accounting Profit'?
+ * **Answer:** Economic profit subtracts opportunity costs.
+ * **Rationale:** While accounting profit only deducts explicit monetary expenses, economic profit also deducts the opportunity cost of the capital utilized.
+* **Question:** If a company has excellent profitability but continually struggles to pay its short-term salaries and utility bills, it is suffering from poor ________.
+ * **Answer:** Liquidity * **Rationale:** Liquidity refers to short-term financial health and the ability to convert assets to cash quickly to pay immediate obligations. Solvency refers to long-term health.
+* **Question:** A company guarantees a massive bank loan for a subsidiary entity. This obligation is not currently a firm debt, but it will become one if the subsidiary defaults. How is this classified?
+ * **Answer:** Contingent Liability * **Rationale:** Contingent liabilities depend on the outcome of a future uncertain event (like a default or a lawsuit verdict).
+* **Question:** If an oil company makes a sudden, massive, one-time profit simply because global geopolitical tensions spiked crude prices (not due to their own operational excellence), what is this called?
+ * **Answer:** Windfall Profit * **Rationale:** Windfall profit is an unexpected, extraordinary profit arising from external factors rather than regular operations.
+* **Question:** A company uses the Declining Balance Method for an asset. Compared to the Straight-Line Method, what happens to the depreciation expense over time?
+ * **Answer:** It is much higher in the early years.
+ * **Rationale:** Declining balance applies a fixed percentage to the remaining book value, front-loading the depreciation expense (useful for tech that obsolesces quickly).
+* **Question:** In a P&L Statement, how is 'Gross Profit' calculated?
+ * **Answer:** Sales (Revenue) minus Cost of Goods Sold (COGS) * **Rationale:** Gross profit only accounts for the direct costs tied to producing the goods, before deducting operating expenses like rent or admin salaries.
+* **Question:** Which financial statement is a 'snapshot' prepared on a specific date that proves Assets = Liabilities + Equity?
+ * **Answer:** The Balance Sheet * **Rationale:** Unlike the P&L which covers a period of time (e.g., a year), the Balance Sheet shows the exact financial position at one specific moment.
+* **Question:** When calculating EBITDA, which of the following is deliberately ignored to focus purely on core operational profitability?
+ * **Answer:** Interest, Taxes, Depreciation, and Amortization * **Rationale:** EBITDA strips out accounting decisions (depreciation) and financing decisions (interest) to show raw operational cash-generating ability.
+
+## Operations & SCM
+
+* **Question:** A sudden 5% increase in consumer demand for paper towels leads a retailer to increase orders by 10%, causing the manufacturer to increase production by 20%. What is this phenomenon called?
+ * **Answer:** The Bullwhip Effect * **Rationale:** The Bullwhip Effect occurs when small fluctuations in retail demand cause amplified, massive fluctuations up the supply chain due to lack of visibility.
+* **Question:** Unlike a 3PL which merely executes transport or warehousing, this type of logistics provider takes over the strategic management and optimization of a company's entire end-to-end supply chain.
+ * **Answer:** Fourth-Party Logistics (4PL) * **Rationale:** A 4PL acts as a single point of contact that integrates multiple 3PLs, IT systems, and consulting to optimize the whole chain.
+* **Question:** Which specific supply chain philosophy focuses heavily on the elimination of 'Waste' (non-value-adding activities) and incorporates Just-In-Time (JIT) production?
+ * **Answer:** Lean Supply Chain * **Rationale:** Lean emphasizes removing inefficiencies, shrinking inventory holding costs, and utilizing continuous improvement (Kaizen).
+* **Question:** In operations problem-solving, what specifically does the 'Where' refer to in the 5W1H technique?
+ * **Answer:** The physical or process location of the problem.
+ * **Rationale:** Where defines if the problem is in a specific machine, a specific menu, or a geographical department.
+* **Question:** In an e-commerce supply chain, what is generally considered the most expensive and complex segment of moving the product to the customer?
+ * **Answer:** Last-Mile Delivery * **Rationale:** The last mile (warehouse to customer doorstep) accounts for up to 50% of shipping costs due to traffic, failed deliveries, and routing complexities.
+
+## Japanese Management
+
+* **Question:** In the 3M framework, a restaurant experiences massive lunch rushes and completely empty afternoons, leading to severe staff inefficiencies. Which 'M' does this represent?
+ * **Answer:** Mura (Inconsistency) * **Rationale:** Mura refers to unevenness or inconsistency in workload or demand. The solution is smoothing the workflow.
+* **Question:** A manager leaves their office and walks directly to the factory assembly line to visually inspect a bottleneck. Which of the '3G's' does this action embody?
+ * **Answer:** Gemba * **Rationale:** Gemba translates to 'Go to the spot'. It emphasizes diagnosing problems where the actual work happens, rather than from a desk.
+* **Question:** Within the 5S methodology, ensuring that tools are logically organized so that any worker can easily find and retrieve them without wasted motion corresponds to which 'S'?
+ * **Answer:** Seiton (Straighten/Set in Order) * **Rationale:** Seiton means organizing workstations logically so there is a 'place for everything and everything in its place'.
+* **Question:** In the 3K framework, what does 'Kichin To Mamoru' mean?
+ * **Answer:** Must be followed (Compliance) * **Rationale:** It emphasizes the strict adherence to established rules and standards to ensure stable quality and safety.
+* **Question:** A developer is forced to code 14 hours a day to meet an unrealistic product launch deadline, resulting in massive bugs and fatigue. Under the 3M framework, this is an example of:
+ * **Answer:** Muri (Inconvenience/Overburden) * **Rationale:** Muri is the overburdening of people or equipment, which ultimately leads to burnout, breakdowns, and defects.
+
+## Leadership & OB
+
+* **Question:** A manager believes their employees inherently dislike work, avoid responsibility, and must be strictly controlled with fear-based motivations to achieve goals. Which theory does this manager subscribe to?
+ * **Answer:** McGregor's Theory X * **Rationale:** Theory X is an authoritarian, pessimistic view of human motivation, requiring strict supervision.
+* **Question:** An employee has a stable salary and safe working conditions, but feels disconnected from their peers and excluded from team activities. According to Maslow, which need is currently unmet?
+ * **Answer:** Social / Belongingness Needs * **Rationale:** These needs encompass relationships, inclusive culture, and feeling part of a community. It sits just above Safety needs.
+* **Question:** A leader completely delegates decision-making to their highly-skilled department heads and avoids micromanaging, focusing only on high-level strategy. What leadership style is this?
+ * **Answer:** Laissez-Faire * **Rationale:** Laissez-Faire involves high trust and minimal supervision, working best with intrinsically motivated and expert teams.
+* **Question:** According to the class slides, which managerial role involves acting as an entrepreneur and handling resource allocation and disturbances?
+ * **Answer:** Decisional Role * **Rationale:** Mintzberg's roles divide management into Interpersonal (figurehead), Informational (spokesperson), and Decisional (negotiator, resource allocator).
+
+## Marketing
+
+* **Question:** A boutique fitness brand decides to target only high-income, eco-conscious professionals in a specific urban zip code. Which level of segmentation are they using?
+ * **Answer:** Niche / Local Marketing * **Rationale:** They are slicing the market into a highly specific group rather than utilizing a Mass Marketing approach.
+* **Question:** Creating a detailed fictional profile (e.g., 'Tech Titan Tapan, 29, early tech adopter') to better target advertising and product design is known as creating a what?
+ * **Answer:** Customer Persona * **Rationale:** Personas help marketers align products with psychographic profiles, values, and buying behaviors.

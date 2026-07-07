@@ -1,0 +1,342 @@
+# Master Tech Test — Bash, Web Dev, GDB
+
+## Section 1: Bash Scripting
+
+### Q1: Beginner (1 pt)
+Which command displays the contents of a file one screen at a time, allowing you to scroll through it?
+- A) cat
+- B) grep
+- C) less
+- D) tail
+
+### Q2: Beginner (1 pt)
+What does the following command do?
+`chmod 755 script.sh`
+- A) Gives full permissions to everyone
+- B) Owner: rwx; Group & Others: r-x
+- C) Makes the file read-only
+- D) Deletes the file permissions
+
+### Q3: Beginner (1 pt)
+What symbol is used to redirect standard output to a file, appending to it instead of overwriting?
+- A) `>`
+- B) `|`
+- C) `>>`
+- D) `&&`
+
+### Q4: Beginner (1 pt)
+What is the special variable `$?` used for in Bash?
+- A) Number of arguments passed to the script
+- B) Exit status of the last command
+- C) PID of the current script
+- D) Name of the script
+
+### Q5: Intermediate (2 pts)
+What does the following script snippet output when `x=10`?
+```bash
+if [[ $x -gt 5 && $x -lt 20 ]]; then
+  echo "in range"
+else
+  echo "out of range"
+fi
+```
+- A) in range
+- B) out of range
+- C) Syntax error
+- D) Nothing — blank output
+
+### Q6: Intermediate (2 pts)
+What is the output of this Bash array operation?
+```bash
+arr=("alpha" "beta" "gamma")
+echo ${#arr[@]}
+```
+- A) alpha
+- B) alpha beta gamma
+- C) 3
+- D) 5 (length of "alpha")
+
+### Q7: Intermediate (2 pts)
+What does `2>&1` mean in a Bash command?
+- A) Run command twice
+- B) Redirect stderr to stdout
+- C) Redirect stdout to stderr
+- D) Suppress all output
+
+### Q8: Intermediate (2 pts)
+Complete the command: to search for all `.log` files in `/var` and its subdirectories, modified in the last 7 days, you would use:
+- A) `grep -r "*.log" /var --days=7`
+- B) `ls -R /var/*.log -t 7`
+- C) `find /var -name "*.log" -mtime -7`
+- D) `locate /var -name "*.log" -days 7`
+
+### Q9: Advanced (3 pts)
+What is the output of this process substitution?
+`diff <(ls dir1) <(ls dir2)`
+- A) Lists files in both dirs combined
+- B) Shows differences between the two directory listings
+- C) Syntax error — diff cannot use process substitution
+- D) Recursively copies files from dir1 to dir2
+
+### Q10: Advanced (3 pts)
+Fill in the blank: The `trap` command is used to catch ______ in Bash scripts and execute cleanup actions.
+
+### Q11: Advanced (3 pts)
+What does `set -euo pipefail` do at the top of a Bash script?
+- A) Enables debug mode with xtrace logging
+- B) Runs the script in a subshell
+- C) Enables extended glob patterns
+- D) Exit on error, unset vars, and pipe failures
+
+### Q12: Advanced (3 pts)
+What is the result of this parameter expansion?
+```bash
+str="hello world"
+echo ${str/world/bash}
+```
+- A) hello world
+- B) hello bash
+- C) bash world
+- D) Syntax error
+
+### Q13: Advanced (3 pts)
+In Bash, what is the difference between `[ ]` (single brackets) and `[[ ]]` (double brackets)?
+- A) No difference — they are identical
+- B) [ ] is for arithmetic, [[ ]] is for strings
+- C) [[ ]] is Bash-specific, supports regex, &&/||, no word-splitting
+- D) [ ] supports regex; [[ ]] does not
+
+### Q14: Advanced (3 pts)
+What does this awk one-liner do?
+`awk '{sum += $2} END {print sum}' data.txt`
+- A) Prints every second line of the file
+- B) Counts lines containing numbers
+- C) Sums all values in the second column
+- D) Prints the second word of each line
+
+### Q15: Advanced (3 pts)
+Fill in the blank: In Bash, `$(( ))` is used for ______ evaluation.
+
+## Section 2: Web Development
+
+### Q16: Beginner (1 pt)
+What is the correct HTML tag for the largest heading?
+- A) `<h1>`
+- B) `<h6>`
+- C) `<heading>`
+- D) `<title>`
+
+### Q17: Beginner (1 pt)
+Which CSS property controls the space INSIDE an element's border (between the border and the content)?
+- A) margin
+- B) spacing
+- C) padding
+- D) border-spacing
+
+### Q18: Beginner (1 pt)
+In JavaScript, what is the output of `typeof null`?
+- A) "null"
+- B) "undefined"
+- C) "object"
+- D) "number"
+
+### Q19: Intermediate (2 pts)
+What will this JavaScript promise chain output?
+```javascript
+Promise.resolve(1)
+  .then(v => v + 1)
+  .then(v => v * 3)
+  .then(v => console.log(v));
+```
+- A) 3
+- B) 4
+- C) 6
+- D) undefined
+
+### Q20: Intermediate (2 pts)
+Which CSS layout model allows you to create 2D grid layouts with rows AND columns?
+- A) Flexbox
+- B) Float layout
+- C) Table layout
+- D) CSS Grid
+
+### Q21: Intermediate (2 pts)
+What is the HTTP status code for "Not Found"?
+- A) 200
+- B) 500
+- C) 404
+- D) 301
+
+### Q22: Intermediate (2 pts)
+What does the CSS `position: sticky` do?
+- A) Fixes an element permanently to the viewport
+- B) Removes the element from document flow
+- C) Scrolls normally until a threshold, then sticks
+- D) Same as position: fixed
+
+### Q23: Intermediate (2 pts)
+In JavaScript, what is the difference between `==` and `===`?
+- A) No difference — they are the same
+- B) === checks value AND type; == does type coercion
+- C) == is for numbers only; === is for strings only
+- D) === is for assignment; == is for comparison
+
+### Q24: Advanced (3 pts)
+What is the concept of "event delegation" in the DOM?
+- A) Adding separate event listeners to every child element
+- B) Preventing events from bubbling up
+- C) Attaching one listener to a parent to handle events from children
+- D) Using addEventListener with capture phase only
+
+### Q25: Advanced (3 pts)
+What does this JavaScript code output?
+```javascript
+const fn = async () => {
+  try {
+    const result = await Promise.reject(new Error("oops"));
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+fn();
+```
+- A) undefined
+- B) UnhandledPromiseRejection
+- C) oops
+- D) Error: oops
+
+### Q26: Advanced (3 pts)
+What is the purpose of the HTTP `Content-Security-Policy` header?
+- A) Compresses HTTP responses with gzip
+- B) Controls which resources can be loaded, preventing XSS
+- C) Enforces HTTPS by redirecting HTTP requests
+- D) Caches static assets on the client
+
+### Q27: Advanced (3 pts)
+Fill in the blank: The browser rendering concept where CSS properties like `transform` and `opacity` can be animated cheaply because they trigger only ______ (not layout/paint).
+
+### Q28: Advanced (3 pts)
+In React, what triggers a component re-render?
+- A) Any function call inside the component
+- B) Accessing a prop inside JSX
+- C) Mutating a variable directly (not state)
+- D) State change, prop change, or context change
+
+### Q29: Advanced (3 pts)
+What is a CORS preflight request?
+- A) A request to pre-load a cached resource
+- B) First request in a WebSocket handshake
+- C) An OPTIONS request asking if the actual request is permitted
+- D) A browser cache validation request
+
+### Q30: Advanced (3 pts)
+What is the output of this JavaScript code?
+```javascript
+console.log(1);
+setTimeout(() => console.log(2), 0);
+Promise.resolve().then(() => console.log(3));
+console.log(4);
+```
+- A) 1, 2, 3, 4
+- B) 1, 3, 2, 4
+- C) 1, 4, 2, 3
+- D) 1, 4, 3, 2
+
+## Section 3: GDB Debugger
+
+### Q31: Beginner (1 pt)
+To compile a C program for debugging with GDB, which flag must be passed to gcc?
+- A) -O2
+- B) -g
+- C) -Wall
+- D) -debug
+
+### Q32: Beginner (1 pt)
+In GDB, what is the difference between the `next` (n) and `step` (s) commands?
+- A) next exits the program; step continues it
+- B) next runs to next breakpoint; step runs one assembly instruction
+- C) next steps over function calls; step steps into them
+- D) They are identical — both execute one line
+
+### Q33: Beginner (1 pt)
+Which GDB command prints the value of a variable (e.g., variable `x`)?
+- A) show x
+- B) print x
+- C) display x only
+- D) echo x
+
+### Q34: Intermediate (2 pts)
+What does a watchpoint do in GDB?
+- A) Pauses execution when a function is called
+- B) Sets a breakpoint at a memory address
+- C) Pauses execution when a variable's value changes
+- D) Monitors CPU usage during execution
+
+### Q35: Intermediate (2 pts)
+Which GDB command shows the call stack (list of active function frames)?
+- A) stack
+- B) backtrace
+- C) frames
+- D) callstack
+
+### Q36: Intermediate (2 pts)
+Fill in the blank: The GDB command `break main.c:42` sets a breakpoint at line ______ of file main.c.
+
+### Q37: Intermediate (2 pts)
+What does the GDB command `info registers` show?
+- A) Registered breakpoints in the session
+- B) List of registered library functions
+- C) Current CPU register values
+- D) Memory addresses of global variables
+
+### Q38: Advanced (3 pts)
+What is a core dump and how do you load one in GDB?
+- A) A backup copy of source code; load with: gdb --restore core
+- B) A CPU usage log; load with: gdb core --analyze
+- C) A memory snapshot at crash time; load with: gdb ./program core
+- D) A heap allocation log; load with: gdb --heap core
+
+### Q39: Advanced (3 pts)
+What does the GDB command `x/10wx $rsp` do?
+- A) Prints 10 lines of assembly at the stack pointer
+- B) Sets a watchpoint for the rsp register
+- C) Examines 10 words of memory at the stack pointer in hex
+- D) Deletes 10 breakpoints starting from the stack pointer
+
+### Q40: Advanced (3 pts)
+In GDB, how would you set a conditional breakpoint that only triggers when variable `i` equals `99`?
+- A) `break if i==99`
+- B) `watch i==99`
+- C) `break line_num if i==99`
+- D) `break --when i==99`
+
+### Q41: Advanced (3 pts)
+What is reverse debugging in GDB and which command enables it?
+- A) Running the program in reverse order; enabled with `set reverse on`
+- B) Re-executing backwards after recording; enabled with `record`
+- C) Debugging by reading assembly backwards; no special command
+- D) Attaching to a crashed process; enabled with `attach --reverse`
+
+### Q42: Advanced (3 pts)
+What is the GDB Python API used for?
+- A) Compiling Python code with debug symbols
+- B) Running Python programs inside GDB's address space
+- C) Extending GDB with custom commands, pretty-printers, and automation
+- D) Converting Python scripts to C for faster debugging
+
+### Q43: Advanced (3 pts)
+Fill in the blank: The GDB command `disassemble main` shows the ______ code of the main function.
+
+### Q44: Advanced (3 pts)
+Which GDB command attaches the debugger to an already-running process by its PID?
+- A) connect [PID]
+- B) inject [PID]
+- C) attach [PID]
+- D) link [PID]
+
+### Q45: Advanced (3 pts)
+When debugging a segfault, what is typically the FIRST GDB command to run after the crash?
+- A) `restart`
+- B) `info memory`
+- C) `backtrace`
+- D) `print $rip`

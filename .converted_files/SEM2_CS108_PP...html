@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Tech Test — Bash · Web Dev · GDB</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent-bash: #00ff9d;
+    --accent-web: #ff6b35;
+    --accent-gdb: #a78bfa;
+    --text: #e8e8f0;
+    --muted: #6b6b82;
+    --correct: #00ff9d;
+    --wrong: #ff4466;
+    --warn: #ffcc44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,157,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,157,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative; z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent-bash) 0%, var(--accent-web) 50%, var(--accent-gdb) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Score bar */
+  #scoreboard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin-bottom: 44px;
+    gap: 20px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .score-item { text-align: center; }
+  .score-item .val {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    display: block;
+  }
+  .score-item .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  #total-score .val { color: var(--warn); }
+
+  .progress-bar {
+    flex: 1 1 200px;
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-bash), var(--accent-web), var(--accent-gdb));
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  /* Section headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 24px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .bash-badge { background: rgba(0,255,157,0.12); color: var(--accent-bash); border: 1px solid rgba(0,255,157,0.3); }
+  .web-badge  { background: rgba(255,107,53,0.12); color: var(--accent-web);  border: 1px solid rgba(255,107,53,0.3); }
+  .gdb-badge  { background: rgba(167,139,250,0.12); color: var(--accent-gdb); border: 1px solid rgba(167,139,250,0.3); }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* Difficulty tags */
+  .diff-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .diff-tag {
+    font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 4px; cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .diff-tag.beg  { background: rgba(0,255,157,0.15); color: var(--accent-bash); border: 1px solid rgba(0,255,157,0.25); }
+  .diff-tag.int  { background: rgba(255,204,68,0.15); color: var(--warn);       border: 1px solid rgba(255,204,68,0.25); }
+  .diff-tag.adv  { background: rgba(255,68,102,0.15); color: var(--wrong);      border: 1px solid rgba(255,68,102,0.25); }
+
+  /* Question card */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 18px;
+    transition: border-color 0.3s;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .q-card:hover { border-color: #3a3a52; }
+  .q-card.answered-correct { border-color: var(--correct); }
+  .q-card.answered-wrong   { border-color: var(--wrong); }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .q-num {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .q-points {
+    font-size: 0.65rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+
+  .q-text {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+
+  code, .code-block {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  code {
+    font-size: 0.85em;
+    padding: 2px 7px;
+    color: var(--accent-bash);
+  }
+
+  .code-block {
+    display: block;
+    padding: 16px 20px;
+    font-size: 0.82rem;
+    color: #b8c8e8;
+    line-height: 1.8;
+    margin: 12px 0 18px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  .code-block .kw  { color: var(--accent-gdb); }
+  .code-block .str { color: var(--accent-web); }
+  .code-block .cmt { color: var(--muted); font-style: italic; }
+  .code-block .fn  { color: var(--warn); }
+  .code-block .num { color: var(--accent-bash); }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .opt-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .opt-btn:hover:not(:disabled) {
+    border-color: #4a4a62;
+    background: #1c1c28;
+    transform: translateX(3px);
+  }
+
+  .opt-btn .opt-letter {
+    min-width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .opt-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,255,157,0.07);
+  }
+  .opt-btn.correct .opt-letter {
+    background: var(--correct);
+    color: var(--bg);
+  }
+
+  .opt-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,68,102,0.07);
+  }
+  .opt-btn.wrong .opt-letter {
+    background: var(--wrong);
+    color: var(--bg);
+  }
+
+  .opt-btn:disabled { cursor: default; }
+
+  /* Fill blank */
+  .fill-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    width: 100%;
+    max-width: 420px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .fill-input:focus { border-color: #5a5a7a; }
+  .fill-input.correct { border-color: var(--correct); color: var(--correct); }
+  .fill-input.wrong   { border-color: var(--wrong);   color: var(--wrong); }
+
+  .check-btn {
+    margin-top: 10px;
+    padding: 10px 22px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .check-btn:hover:not(:disabled) {
+    border-color: var(--accent-gdb);
+    color: var(--accent-gdb);
+  }
+  .check-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Explanation */
+  .explanation {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid var(--accent-gdb);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.82rem;
+    color: #a0a0c0;
+    line-height: 1.7;
+  }
+  .explanation.show { display: block; animation: fadeUp 0.3s ease; }
+
+  /* Final result */
+  #result-panel {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    margin-top: 48px;
+    animation: fadeUp 0.6s ease;
+  }
+  #result-panel.show { display: block; }
+
+  #result-grade {
+    font-family: 'Syne', sans-serif;
+    font-size: 5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  #result-msg {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  #breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .breakdown-item { text-align: center; }
+  .breakdown-item .bval {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: block;
+  }
+  .breakdown-item .blbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .reset-btn {
+    padding: 14px 36px;
+    background: transparent;
+    border: 1px solid var(--accent-bash);
+    color: var(--accent-bash);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover {
+    background: rgba(0,255,157,0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Submit all */
+  #submit-all {
+    display: block;
+    width: 100%;
+    margin-top: 40px;
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(0,255,157,0.15), rgba(167,139,250,0.15));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+  #submit-all:hover {
+    border-color: var(--accent-bash);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,255,157,0.1);
+  }
+
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+
+  @media (max-width: 600px) {
+    .q-card { padding: 20px; }
+    #scoreboard { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>MASTER TECH TEST</h1>
+    <p>Bash (Beginner → Advanced) &nbsp;·&nbsp; Web Development &nbsp;·&nbsp; GDB Debugger</p>
+  </header>
+
+  <div id="scoreboard">
+    <div class="score-item" id="total-score">
+      <span class="val" id="score-val">0</span>
+      <span class="lbl">Score</span>
+    </div>
+    <div class="score-item">
+      <span class="val" id="correct-val" style="color:var(--correct)">0</span>
+      <span class="lbl">Correct</span>
+    </div>
+    <div class="score-item">
+      <span class="val" id="wrong-val" style="color:var(--wrong)">0</span>
+      <span class="lbl">Wrong</span>
+    </div>
+    <div class="score-item">
+      <span class="val" id="remain-val" style="color:var(--muted)">45</span>
+      <span class="lbl">Remaining</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- ===== BASH SECTION ===== -->
+  <div class="section-header">
+    <span class="section-badge bash-badge">Section 1</span>
+    <span class="section-title">Bash Scripting</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="diff-row">
+    <span class="diff-tag beg">● Beginner</span>
+    <span class="diff-tag int">● Intermediate</span>
+    <span class="diff-tag adv">● Advanced</span>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card" id="q1">
+    <div class="q-meta">
+      <span class="q-num">Q1</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">Which command displays the contents of a file one screen at a time, allowing you to scroll through it?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q1','A','C','less displays file content one page at a time — use Space to go forward, b to go back. cat prints the whole file at once.')"><span class="opt-letter">A</span> cat</button>
+      <button class="opt-btn" onclick="answer('q1','B','C','less displays file content one page at a time — use Space to go forward, b to go back. cat prints the whole file at once.')"><span class="opt-letter">B</span> grep</button>
+      <button class="opt-btn" onclick="answer('q1','C','C','less displays file content one page at a time — use Space to go forward, b to go back. cat prints the whole file at once.')"><span class="opt-letter">C</span> less</button>
+      <button class="opt-btn" onclick="answer('q1','D','C','less displays file content one page at a time — use Space to go forward, b to go back. cat prints the whole file at once.')"><span class="opt-letter">D</span> tail</button>
+    </div>
+    <div class="explanation" id="q1-exp"></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" id="q2">
+    <div class="q-meta">
+      <span class="q-num">Q2</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">What does the following command do?</p>
+    <code class="code-block">chmod 755 script.sh</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q2','A','B','chmod 755 = rwxr-xr-x: owner gets full permissions (7=rwx), group and others get read+execute (5=r-x).')"><span class="opt-letter">A</span> Gives full permissions to everyone</button>
+      <button class="opt-btn" onclick="answer('q2','B','B','chmod 755 = rwxr-xr-x: owner gets full permissions (7=rwx), group and others get read+execute (5=r-x).')"><span class="opt-letter">B</span> Owner: rwx; Group &amp; Others: r-x</button>
+      <button class="opt-btn" onclick="answer('q2','C','B','chmod 755 = rwxr-xr-x: owner gets full permissions (7=rwx), group and others get read+execute (5=r-x).')"><span class="opt-letter">C</span> Makes the file read-only</button>
+      <button class="opt-btn" onclick="answer('q2','D','B','chmod 755 = rwxr-xr-x: owner gets full permissions (7=rwx), group and others get read+execute (5=r-x).')"><span class="opt-letter">D</span> Deletes the file permissions</button>
+    </div>
+    <div class="explanation" id="q2-exp"></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card" id="q3">
+    <div class="q-meta">
+      <span class="q-num">Q3</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">What symbol is used to redirect standard output to a file, <em>appending</em> to it instead of overwriting?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q3','A','C','> overwrites, >> appends. e.g., echo hello >> log.txt adds a line without erasing existing content.')"><span class="opt-letter">A</span> <code>&gt;</code></button>
+      <button class="opt-btn" onclick="answer('q3','B','C','> overwrites, >> appends. e.g., echo hello >> log.txt adds a line without erasing existing content.')"><span class="opt-letter">B</span> <code>|</code></button>
+      <button class="opt-btn" onclick="answer('q3','C','C','> overwrites, >> appends. e.g., echo hello >> log.txt adds a line without erasing existing content.')"><span class="opt-letter">C</span> <code>&gt;&gt;</code></button>
+      <button class="opt-btn" onclick="answer('q3','D','C','> overwrites, >> appends. e.g., echo hello >> log.txt adds a line without erasing existing content.')"><span class="opt-letter">D</span> <code>&amp;&amp;</code></button>
+    </div>
+    <div class="explanation" id="q3-exp"></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-card" id="q4">
+    <div class="q-meta">
+      <span class="q-num">Q4</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">What is the special variable <code>$?</code> used for in Bash?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q4','A','B','$? holds the exit status of the last executed command. 0 = success, non-zero = error. Essential for conditional scripting.')"><span class="opt-letter">A</span> Number of arguments passed to the script</button>
+      <button class="opt-btn" onclick="answer('q4','B','B','$? holds the exit status of the last executed command. 0 = success, non-zero = error. Essential for conditional scripting.')"><span class="opt-letter">B</span> Exit status of the last command</button>
+      <button class="opt-btn" onclick="answer('q4','C','B','$? holds the exit status of the last executed command. 0 = success, non-zero = error. Essential for conditional scripting.')"><span class="opt-letter">C</span> PID of the current script</button>
+      <button class="opt-btn" onclick="answer('q4','D','B','$? holds the exit status of the last executed command. 0 = success, non-zero = error. Essential for conditional scripting.')"><span class="opt-letter">D</span> Name of the script</button>
+    </div>
+    <div class="explanation" id="q4-exp"></div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card" id="q5">
+    <div class="q-meta">
+      <span class="q-num">Q5</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What does the following script snippet output when <code>x=10</code>?</p>
+    <code class="code-block"><span class="kw">if</span> [[ $x <span class="num">-gt</span> <span class="num">5</span> && $x <span class="num">-lt</span> <span class="num">20</span> ]]; <span class="kw">then</span>
+  echo <span class="str">"in range"</span>
+<span class="kw">else</span>
+  echo <span class="str">"out of range"</span>
+<span class="kw">fi</span></code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q5','A','A','10 > 5 AND 10 < 20 are both true, so the if-block runs. [[ ]] supports -gt (greater than) and -lt (less than) comparisons.')"><span class="opt-letter">A</span> in range</button>
+      <button class="opt-btn" onclick="answer('q5','B','A','10 > 5 AND 10 < 20 are both true, so the if-block runs. [[ ]] supports -gt (greater than) and -lt (less than) comparisons.')"><span class="opt-letter">B</span> out of range</button>
+      <button class="opt-btn" onclick="answer('q5','C','A','10 > 5 AND 10 < 20 are both true, so the if-block runs. [[ ]] supports -gt (greater than) and -lt (less than) comparisons.')"><span class="opt-letter">C</span> Syntax error</button>
+      <button class="opt-btn" onclick="answer('q5','D','A','10 > 5 AND 10 < 20 are both true, so the if-block runs. [[ ]] supports -gt (greater than) and -lt (less than) comparisons.')"><span class="opt-letter">D</span> Nothing — blank output</button>
+    </div>
+    <div class="explanation" id="q5-exp"></div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card" id="q6">
+    <div class="q-meta">
+      <span class="q-num">Q6</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What is the output of this Bash array operation?</p>
+    <code class="code-block"><span class="fn">arr</span>=(<span class="str">"alpha"</span> <span class="str">"beta"</span> <span class="str">"gamma"</span>)
+echo ${#arr[@]}</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q6','A','C','${#arr[@]} gives the NUMBER of elements in the array. There are 3 elements: alpha, beta, gamma.')"><span class="opt-letter">A</span> alpha</button>
+      <button class="opt-btn" onclick="answer('q6','B','C','${#arr[@]} gives the NUMBER of elements in the array. There are 3 elements: alpha, beta, gamma.')"><span class="opt-letter">B</span> alpha beta gamma</button>
+      <button class="opt-btn" onclick="answer('q6','C','C','${#arr[@]} gives the NUMBER of elements in the array. There are 3 elements: alpha, beta, gamma.')"><span class="opt-letter">C</span> 3</button>
+      <button class="opt-btn" onclick="answer('q6','D','C','${#arr[@]} gives the NUMBER of elements in the array. There are 3 elements: alpha, beta, gamma.')"><span class="opt-letter">D</span> 5 (length of "alpha")</button>
+    </div>
+    <div class="explanation" id="q6-exp"></div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-card" id="q7">
+    <div class="q-meta">
+      <span class="q-num">Q7</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What does <code>2&gt;&amp;1</code> mean in a Bash command?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q7','A','B','2>&1 redirects stderr (fd 2) to wherever stdout (fd 1) currently points. Useful for capturing all output: cmd > file.log 2>&1')"><span class="opt-letter">A</span> Run command twice</button>
+      <button class="opt-btn" onclick="answer('q7','B','B','2>&1 redirects stderr (fd 2) to wherever stdout (fd 1) currently points. Useful for capturing all output: cmd > file.log 2>&1')"><span class="opt-letter">B</span> Redirect stderr to stdout</button>
+      <button class="opt-btn" onclick="answer('q7','C','B','2>&1 redirects stderr (fd 2) to wherever stdout (fd 1) currently points. Useful for capturing all output: cmd > file.log 2>&1')"><span class="opt-letter">C</span> Redirect stdout to stderr</button>
+      <button class="opt-btn" onclick="answer('q7','D','B','2>&1 redirects stderr (fd 2) to wherever stdout (fd 1) currently points. Useful for capturing all output: cmd > file.log 2>&1')"><span class="opt-letter">D</span> Suppress all output</button>
+    </div>
+    <div class="explanation" id="q7-exp"></div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card" id="q8">
+    <div class="q-meta">
+      <span class="q-num">Q8</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">Complete the command: to search for all <code>.log</code> files in <code>/var</code> and its subdirectories, modified in the last 7 days, you would use:</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q8','A','C','find with -name *.log and -mtime -7 searches recursively for .log files modified less than 7 days ago. -mtime -7 means "less than 7 days".')"><span class="opt-letter">A</span> <code>grep -r "*.log" /var --days=7</code></button>
+      <button class="opt-btn" onclick="answer('q8','B','C','find with -name *.log and -mtime -7 searches recursively for .log files modified less than 7 days ago. -mtime -7 means "less than 7 days".')"><span class="opt-letter">B</span> <code>ls -R /var/*.log -t 7</code></button>
+      <button class="opt-btn" onclick="answer('q8','C','C','find with -name *.log and -mtime -7 searches recursively for .log files modified less than 7 days ago. -mtime -7 means "less than 7 days".')"><span class="opt-letter">C</span> <code>find /var -name "*.log" -mtime -7</code></button>
+      <button class="opt-btn" onclick="answer('q8','D','C','find with -name *.log and -mtime -7 searches recursively for .log files modified less than 7 days ago. -mtime -7 means "less than 7 days".')"><span class="opt-letter">D</span> <code>locate /var -name "*.log" -days 7</code></button>
+    </div>
+    <div class="explanation" id="q8-exp"></div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-card" id="q9">
+    <div class="q-meta">
+      <span class="q-num">Q9</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is the output of this process substitution?</p>
+    <code class="code-block">diff &lt;(ls dir1) &lt;(ls dir2)</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q9','A','B','Process substitution <(cmd) creates a temporary named pipe. diff receives the outputs of both ls commands as if they were files, showing differences between the two directory listings.')"><span class="opt-letter">A</span> Lists files in both dirs combined</button>
+      <button class="opt-btn" onclick="answer('q9','B','B','Process substitution <(cmd) creates a temporary named pipe. diff receives the outputs of both ls commands as if they were files, showing differences between the two directory listings.')"><span class="opt-letter">B</span> Shows differences between the two directory listings</button>
+      <button class="opt-btn" onclick="answer('q9','C','B','Process substitution <(cmd) creates a temporary named pipe. diff receives the outputs of both ls commands as if they were files, showing differences between the two directory listings.')"><span class="opt-letter">C</span> Syntax error — diff cannot use process substitution</button>
+      <button class="opt-btn" onclick="answer('q9','D','B','Process substitution <(cmd) creates a temporary named pipe. diff receives the outputs of both ls commands as if they were files, showing differences between the two directory listings.')"><span class="opt-letter">D</span> Recursively copies files from dir1 to dir2</button>
+    </div>
+    <div class="explanation" id="q9-exp"></div>
+  </div>
+
+  <!-- Q10 fill-blank -->
+  <div class="q-card" id="q10">
+    <div class="q-meta">
+      <span class="q-num">Q10</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">Fill in the blank: The <code>trap</code> command is used to catch ______ in Bash scripts and execute cleanup actions.</p>
+    <input class="fill-input" id="q10-input" type="text" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkFill('q10',['signals','signal','unix signals'])">
+    <br>
+    <button class="check-btn" id="q10-btn" onclick="checkFill('q10',['signals','signal','unix signals'])">Check Answer</button>
+    <div class="explanation" id="q10-exp"></div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-card" id="q11">
+    <div class="q-meta">
+      <span class="q-num">Q11</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What does <code>set -euo pipefail</code> do at the top of a Bash script?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q11','A','D','-e: exit on error. -u: error on unset variables. -o pipefail: pipe returns exit code of first failed command. Together they make scripts fail fast and safely.')"><span class="opt-letter">A</span> Enables debug mode with xtrace logging</button>
+      <button class="opt-btn" onclick="answer('q11','B','D','-e: exit on error. -u: error on unset variables. -o pipefail: pipe returns exit code of first failed command. Together they make scripts fail fast and safely.')"><span class="opt-letter">B</span> Runs the script in a subshell</button>
+      <button class="opt-btn" onclick="answer('q11','C','D','-e: exit on error. -u: error on unset variables. -o pipefail: pipe returns exit code of first failed command. Together they make scripts fail fast and safely.')"><span class="opt-letter">C</span> Enables extended glob patterns</button>
+      <button class="opt-btn" onclick="answer('q11','D','D','-e: exit on error. -u: error on unset variables. -o pipefail: pipe returns exit code of first failed command. Together they make scripts fail fast and safely.')"><span class="opt-letter">D</span> Exit on error, unset vars, and pipe failures</button>
+    </div>
+    <div class="explanation" id="q11-exp"></div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" id="q12">
+    <div class="q-meta">
+      <span class="q-num">Q12</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is the result of this parameter expansion?</p>
+    <code class="code-block">str="hello world"
+echo ${str/world/bash}</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q12','A','B','${var/pattern/replacement} replaces the FIRST occurrence of "pattern" with "replacement". Double slash ${var//p/r} replaces ALL occurrences.')"><span class="opt-letter">A</span> hello world</button>
+      <button class="opt-btn" onclick="answer('q12','B','B','${var/pattern/replacement} replaces the FIRST occurrence of "pattern" with "replacement". Double slash ${var//p/r} replaces ALL occurrences.')"><span class="opt-letter">B</span> hello bash</button>
+      <button class="opt-btn" onclick="answer('q12','C','B','${var/pattern/replacement} replaces the FIRST occurrence of "pattern" with "replacement". Double slash ${var//p/r} replaces ALL occurrences.')"><span class="opt-letter">C</span> bash world</button>
+      <button class="opt-btn" onclick="answer('q12','D','B','${var/pattern/replacement} replaces the FIRST occurrence of "pattern" with "replacement". Double slash ${var//p/r} replaces ALL occurrences.')"><span class="opt-letter">D</span> Syntax error</button>
+    </div>
+    <div class="explanation" id="q12-exp"></div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card" id="q13">
+    <div class="q-meta">
+      <span class="q-num">Q13</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">In Bash, what is the difference between <code>[ ]</code> (single brackets) and <code>[[ ]]</code> (double brackets)?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q13','A','C','[ ] is a POSIX-compatible external command (alias for test). [[ ]] is a Bash built-in keyword that supports &&, ||, regex (=~), and does not word-split or glob-expand variables.')"><span class="opt-letter">A</span> No difference — they are identical</button>
+      <button class="opt-btn" onclick="answer('q13','B','C','[ ] is a POSIX-compatible external command (alias for test). [[ ]] is a Bash built-in keyword that supports &&, ||, regex (=~), and does not word-split or glob-expand variables.')"><span class="opt-letter">B</span> [ ] is for arithmetic, [[ ]] is for strings</button>
+      <button class="opt-btn" onclick="answer('q13','C','C','[ ] is a POSIX-compatible external command (alias for test). [[ ]] is a Bash built-in keyword that supports &&, ||, regex (=~), and does not word-split or glob-expand variables.')"><span class="opt-letter">C</span> [[ ]] is Bash-specific, supports regex, &&/||, no word-splitting</button>
+      <button class="opt-btn" onclick="answer('q13','D','C','[ ] is a POSIX-compatible external command (alias for test). [[ ]] is a Bash built-in keyword that supports &&, ||, regex (=~), and does not word-split or glob-expand variables.')"><span class="opt-letter">D</span> [ ] supports regex; [[ ]] does not</button>
+    </div>
+    <div class="explanation" id="q13-exp"></div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-card" id="q14">
+    <div class="q-meta">
+      <span class="q-num">Q14</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What does this awk one-liner do?</p>
+    <code class="code-block">awk <span class="str">'{sum += $2} END {print sum}'</span> data.txt</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q14','A','C','awk processes each line, adding the value of the 2nd field ($2) to sum. After all lines (END block), it prints the total. Classic column summation pattern.')"><span class="opt-letter">A</span> Prints every second line of the file</button>
+      <button class="opt-btn" onclick="answer('q14','B','C','awk processes each line, adding the value of the 2nd field ($2) to sum. After all lines (END block), it prints the total. Classic column summation pattern.')"><span class="opt-letter">B</span> Counts lines containing numbers</button>
+      <button class="opt-btn" onclick="answer('q14','C','C','awk processes each line, adding the value of the 2nd field ($2) to sum. After all lines (END block), it prints the total. Classic column summation pattern.')"><span class="opt-letter">C</span> Sums all values in the second column</button>
+      <button class="opt-btn" onclick="answer('q14','D','C','awk processes each line, adding the value of the 2nd field ($2) to sum. After all lines (END block), it prints the total. Classic column summation pattern.')"><span class="opt-letter">D</span> Prints the second word of each line</button>
+    </div>
+    <div class="explanation" id="q14-exp"></div>
+  </div>
+
+  <!-- Q15 fill-blank -->
+  <div class="q-card" id="q15">
+    <div class="q-meta">
+      <span class="q-num">Q15</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">Fill in the blank: In Bash, <code>$(( ))</code> is used for ______ evaluation.</p>
+    <input class="fill-input" id="q15-input" type="text" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkFill('q15',['arithmetic','math','arithmetic evaluation'])">
+    <br>
+    <button class="check-btn" id="q15-btn" onclick="checkFill('q15',['arithmetic','math','arithmetic evaluation'])">Check Answer</button>
+    <div class="explanation" id="q15-exp"></div>
+  </div>
+
+  <!-- ===== WEB DEV SECTION ===== -->
+  <div class="section-header">
+    <span class="section-badge web-badge">Section 2</span>
+    <span class="section-title">Web Development</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="q-card" id="q16">
+    <div class="q-meta">
+      <span class="q-num">Q16</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">What is the correct HTML tag for the largest heading?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q16','A','A','&lt;h1&gt; is the largest heading. Headings range from h1 (most important) to h6 (least). Only one h1 per page is best practice for SEO.')"><span class="opt-letter">A</span> <code>&lt;h1&gt;</code></button>
+      <button class="opt-btn" onclick="answer('q16','B','A','&lt;h1&gt; is the largest heading. Headings range from h1 (most important) to h6 (least). Only one h1 per page is best practice for SEO.')"><span class="opt-letter">B</span> <code>&lt;h6&gt;</code></button>
+      <button class="opt-btn" onclick="answer('q16','C','A','&lt;h1&gt; is the largest heading. Headings range from h1 (most important) to h6 (least). Only one h1 per page is best practice for SEO.')"><span class="opt-letter">C</span> <code>&lt;heading&gt;</code></button>
+      <button class="opt-btn" onclick="answer('q16','D','A','&lt;h1&gt; is the largest heading. Headings range from h1 (most important) to h6 (least). Only one h1 per page is best practice for SEO.')"><span class="opt-letter">D</span> <code>&lt;title&gt;</code></button>
+    </div>
+    <div class="explanation" id="q16-exp"></div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="q-card" id="q17">
+    <div class="q-meta">
+      <span class="q-num">Q17</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">Which CSS property controls the space INSIDE an element's border (between the border and the content)?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q17','A','C','padding = space INSIDE the border. margin = space OUTSIDE the border. Think: padding protects the content, margin separates elements.')"><span class="opt-letter">A</span> margin</button>
+      <button class="opt-btn" onclick="answer('q17','B','C','padding = space INSIDE the border. margin = space OUTSIDE the border. Think: padding protects the content, margin separates elements.')"><span class="opt-letter">B</span> spacing</button>
+      <button class="opt-btn" onclick="answer('q17','C','C','padding = space INSIDE the border. margin = space OUTSIDE the border. Think: padding protects the content, margin separates elements.')"><span class="opt-letter">C</span> padding</button>
+      <button class="opt-btn" onclick="answer('q17','D','C','padding = space INSIDE the border. margin = space OUTSIDE the border. Think: padding protects the content, margin separates elements.')"><span class="opt-letter">D</span> border-spacing</button>
+    </div>
+    <div class="explanation" id="q17-exp"></div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="q-card" id="q18">
+    <div class="q-meta">
+      <span class="q-num">Q18</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">In JavaScript, what is the output of <code>typeof null</code>?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q18','A','C','typeof null returns "object" — this is a famous JavaScript bug from 1995 that was never fixed for backwards compatibility. null is not actually an object!')"><span class="opt-letter">A</span> "null"</button>
+      <button class="opt-btn" onclick="answer('q18','B','C','typeof null returns "object" — this is a famous JavaScript bug from 1995 that was never fixed for backwards compatibility. null is not actually an object!')"><span class="opt-letter">B</span> "undefined"</button>
+      <button class="opt-btn" onclick="answer('q18','C','C','typeof null returns "object" — this is a famous JavaScript bug from 1995 that was never fixed for backwards compatibility. null is not actually an object!')"><span class="opt-letter">C</span> "object"</button>
+      <button class="opt-btn" onclick="answer('q18','D','C','typeof null returns "object" — this is a famous JavaScript bug from 1995 that was never fixed for backwards compatibility. null is not actually an object!')"><span class="opt-letter">D</span> "number"</button>
+    </div>
+    <div class="explanation" id="q18-exp"></div>
+  </div>
+
+  <!-- Q19 -->
+  <div class="q-card" id="q19">
+    <div class="q-meta">
+      <span class="q-num">Q19</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What will this JavaScript promise chain output?</p>
+    <code class="code-block">Promise.resolve(<span class="num">1</span>)
+  .then(v <span class="kw">=></span> v + <span class="num">1</span>)
+  .then(v <span class="kw">=></span> v * <span class="num">3</span>)
+  .then(v <span class="kw">=></span> console.log(v));</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q19','A','C','Chain: 1 → +1 = 2 → *3 = 6. Each .then() receives the return value of the previous. console.log(6) prints 6.')"><span class="opt-letter">A</span> 3</button>
+      <button class="opt-btn" onclick="answer('q19','B','C','Chain: 1 → +1 = 2 → *3 = 6. Each .then() receives the return value of the previous. console.log(6) prints 6.')"><span class="opt-letter">B</span> 4</button>
+      <button class="opt-btn" onclick="answer('q19','C','C','Chain: 1 → +1 = 2 → *3 = 6. Each .then() receives the return value of the previous. console.log(6) prints 6.')"><span class="opt-letter">C</span> 6</button>
+      <button class="opt-btn" onclick="answer('q19','D','C','Chain: 1 → +1 = 2 → *3 = 6. Each .then() receives the return value of the previous. console.log(6) prints 6.')"><span class="opt-letter">D</span> undefined</button>
+    </div>
+    <div class="explanation" id="q19-exp"></div>
+  </div>
+
+  <!-- Q20 -->
+  <div class="q-card" id="q20">
+    <div class="q-meta">
+      <span class="q-num">Q20</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">Which CSS layout model allows you to create 2D grid layouts with rows AND columns?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q20','A','D','CSS Grid is for 2D layouts (rows AND columns). Flexbox is 1D (row OR column). Use Grid for page layout, Flexbox for component layout.')"><span class="opt-letter">A</span> Flexbox</button>
+      <button class="opt-btn" onclick="answer('q20','B','D','CSS Grid is for 2D layouts (rows AND columns). Flexbox is 1D (row OR column). Use Grid for page layout, Flexbox for component layout.')"><span class="opt-letter">B</span> Float layout</button>
+      <button class="opt-btn" onclick="answer('q20','C','D','CSS Grid is for 2D layouts (rows AND columns). Flexbox is 1D (row OR column). Use Grid for page layout, Flexbox for component layout.')"><span class="opt-letter">C</span> Table layout</button>
+      <button class="opt-btn" onclick="answer('q20','D','D','CSS Grid is for 2D layouts (rows AND columns). Flexbox is 1D (row OR column). Use Grid for page layout, Flexbox for component layout.')"><span class="opt-letter">D</span> CSS Grid</button>
+    </div>
+    <div class="explanation" id="q20-exp"></div>
+  </div>
+
+  <!-- Q21 -->
+  <div class="q-card" id="q21">
+    <div class="q-meta">
+      <span class="q-num">Q21</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What is the HTTP status code for "Not Found"?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q21','A','C','404 = Not Found. Key HTTP codes: 200 OK, 201 Created, 301 Redirect, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Server Error.')"><span class="opt-letter">A</span> 200</button>
+      <button class="opt-btn" onclick="answer('q21','B','C','404 = Not Found. Key HTTP codes: 200 OK, 201 Created, 301 Redirect, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Server Error.')"><span class="opt-letter">B</span> 500</button>
+      <button class="opt-btn" onclick="answer('q21','C','C','404 = Not Found. Key HTTP codes: 200 OK, 201 Created, 301 Redirect, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Server Error.')"><span class="opt-letter">C</span> 404</button>
+      <button class="opt-btn" onclick="answer('q21','D','C','404 = Not Found. Key HTTP codes: 200 OK, 201 Created, 301 Redirect, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Server Error.')"><span class="opt-letter">D</span> 301</button>
+    </div>
+    <div class="explanation" id="q21-exp"></div>
+  </div>
+
+  <!-- Q22 -->
+  <div class="q-card" id="q22">
+    <div class="q-meta">
+      <span class="q-num">Q22</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What does the CSS <code>position: sticky</code> do?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q22','A','C','sticky behaves like relative until it hits a scroll threshold, then sticks like fixed. Perfect for sticky headers/nav. Requires a threshold (top:, bottom:, etc.) to work.')"><span class="opt-letter">A</span> Fixes an element permanently to the viewport</button>
+      <button class="opt-btn" onclick="answer('q22','B','C','sticky behaves like relative until it hits a scroll threshold, then sticks like fixed. Perfect for sticky headers/nav. Requires a threshold (top:, bottom:, etc.) to work.')"><span class="opt-letter">B</span> Removes the element from document flow</button>
+      <button class="opt-btn" onclick="answer('q22','C','C','sticky behaves like relative until it hits a scroll threshold, then sticks like fixed. Perfect for sticky headers/nav. Requires a threshold (top:, bottom:, etc.) to work.')"><span class="opt-letter">C</span> Scrolls normally until a threshold, then sticks</button>
+      <button class="opt-btn" onclick="answer('q22','D','C','sticky behaves like relative until it hits a scroll threshold, then sticks like fixed. Perfect for sticky headers/nav. Requires a threshold (top:, bottom:, etc.) to work.')"><span class="opt-letter">D</span> Same as position: fixed</button>
+    </div>
+    <div class="explanation" id="q22-exp"></div>
+  </div>
+
+  <!-- Q23 -->
+  <div class="q-card" id="q23">
+    <div class="q-meta">
+      <span class="q-num">Q23</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">In JavaScript, what is the difference between <code>==</code> and <code>===</code>?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q23','A','B','=== is strict equality: checks both VALUE and TYPE with no coercion. == is loose: coerces types first (e.g., 0 == false is true, but 0 === false is false). Always prefer ===.')"><span class="opt-letter">A</span> No difference — they are the same</button>
+      <button class="opt-btn" onclick="answer('q23','B','B','=== is strict equality: checks both VALUE and TYPE with no coercion. == is loose: coerces types first (e.g., 0 == false is true, but 0 === false is false). Always prefer ===.')"><span class="opt-letter">B</span> === checks value AND type; == does type coercion</button>
+      <button class="opt-btn" onclick="answer('q23','C','B','=== is strict equality: checks both VALUE and TYPE with no coercion. == is loose: coerces types first (e.g., 0 == false is true, but 0 === false is false). Always prefer ===.')"><span class="opt-letter">C</span> == is for numbers only; === is for strings only</button>
+      <button class="opt-btn" onclick="answer('q23','D','B','=== is strict equality: checks both VALUE and TYPE with no coercion. == is loose: coerces types first (e.g., 0 == false is true, but 0 === false is false). Always prefer ===.')"><span class="opt-letter">D</span> === is for assignment; == is for comparison</button>
+    </div>
+    <div class="explanation" id="q23-exp"></div>
+  </div>
+
+  <!-- Q24 -->
+  <div class="q-card" id="q24">
+    <div class="q-meta">
+      <span class="q-num">Q24</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is the concept of "event delegation" in the DOM?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q24','A','C','Event delegation: attach ONE listener to a parent element. Events bubble up from children to parents. Use event.target to identify which child triggered it. Efficient for dynamic lists.')"><span class="opt-letter">A</span> Adding separate event listeners to every child element</button>
+      <button class="opt-btn" onclick="answer('q24','B','C','Event delegation: attach ONE listener to a parent element. Events bubble up from children to parents. Use event.target to identify which child triggered it. Efficient for dynamic lists.')"><span class="opt-letter">B</span> Preventing events from bubbling up</button>
+      <button class="opt-btn" onclick="answer('q24','C','C','Event delegation: attach ONE listener to a parent element. Events bubble up from children to parents. Use event.target to identify which child triggered it. Efficient for dynamic lists.')"><span class="opt-letter">C</span> Attaching one listener to a parent to handle events from children</button>
+      <button class="opt-btn" onclick="answer('q24','D','C','Event delegation: attach ONE listener to a parent element. Events bubble up from children to parents. Use event.target to identify which child triggered it. Efficient for dynamic lists.')"><span class="opt-letter">D</span> Using addEventListener with capture phase only</button>
+    </div>
+    <div class="explanation" id="q24-exp"></div>
+  </div>
+
+  <!-- Q25 -->
+  <div class="q-card" id="q25">
+    <div class="q-meta">
+      <span class="q-num">Q25</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What does this JavaScript code output?</p>
+    <code class="code-block"><span class="kw">const</span> fn = <span class="kw">async</span> () <span class="kw">=></span> {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> result = <span class="kw">await</span> Promise.reject(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"oops"</span>));
+  } <span class="kw">catch</span> (e) {
+    console.log(e.message);
+  }
+};
+fn();</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q25','A','C','Promise.reject() creates a rejected promise. await unwraps it and throws the error into the try-catch. The catch block logs "oops".')"><span class="opt-letter">A</span> undefined</button>
+      <button class="opt-btn" onclick="answer('q25','B','C','Promise.reject() creates a rejected promise. await unwraps it and throws the error into the try-catch. The catch block logs "oops".')"><span class="opt-letter">B</span> UnhandledPromiseRejection</button>
+      <button class="opt-btn" onclick="answer('q25','C','C','Promise.reject() creates a rejected promise. await unwraps it and throws the error into the try-catch. The catch block logs "oops".')"><span class="opt-letter">C</span> oops</button>
+      <button class="opt-btn" onclick="answer('q25','D','C','Promise.reject() creates a rejected promise. await unwraps it and throws the error into the try-catch. The catch block logs "oops".')"><span class="opt-letter">D</span> Error: oops</button>
+    </div>
+    <div class="explanation" id="q25-exp"></div>
+  </div>
+
+  <!-- Q26 -->
+  <div class="q-card" id="q26">
+    <div class="q-meta">
+      <span class="q-num">Q26</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is the purpose of the HTTP <code>Content-Security-Policy</code> header?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q26','A','B','CSP restricts which resources (scripts, styles, images, etc.) can be loaded, mitigating XSS and injection attacks. Example: Content-Security-Policy: script-src \'self\' only allows scripts from same origin.')"><span class="opt-letter">A</span> Compresses HTTP responses with gzip</button>
+      <button class="opt-btn" onclick="answer('q26','B','B','CSP restricts which resources (scripts, styles, images, etc.) can be loaded, mitigating XSS and injection attacks. Example: Content-Security-Policy: script-src \'self\' only allows scripts from same origin.')"><span class="opt-letter">B</span> Controls which resources can be loaded, preventing XSS</button>
+      <button class="opt-btn" onclick="answer('q26','C','B','CSP restricts which resources (scripts, styles, images, etc.) can be loaded, mitigating XSS and injection attacks. Example: Content-Security-Policy: script-src \'self\' only allows scripts from same origin.')"><span class="opt-letter">C</span> Enforces HTTPS by redirecting HTTP requests</button>
+      <button class="opt-btn" onclick="answer('q26','D','B','CSP restricts which resources (scripts, styles, images, etc.) can be loaded, mitigating XSS and injection attacks. Example: Content-Security-Policy: script-src \'self\' only allows scripts from same origin.')"><span class="opt-letter">D</span> Caches static assets on the client</button>
+    </div>
+    <div class="explanation" id="q26-exp"></div>
+  </div>
+
+  <!-- Q27 fill-blank -->
+  <div class="q-card" id="q27">
+    <div class="q-meta">
+      <span class="q-num">Q27</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">Fill in the blank: The browser rendering concept where CSS properties like <code>transform</code> and <code>opacity</code> can be animated cheaply because they trigger only ______ (not layout/paint).</p>
+    <input class="fill-input" id="q27-input" type="text" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkFill('q27',['compositing','composite','compositing step','the compositing step'])">
+    <br>
+    <button class="check-btn" id="q27-btn" onclick="checkFill('q27',['compositing','composite','compositing step','the compositing step'])">Check Answer</button>
+    <div class="explanation" id="q27-exp"></div>
+  </div>
+
+  <!-- Q28 -->
+  <div class="q-card" id="q28">
+    <div class="q-meta">
+      <span class="q-num">Q28</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">In React, what triggers a component re-render?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q28','A','D','Re-renders are triggered by: (1) setState / useState setter called, (2) parent re-renders and passes new props, (3) context value changes. Direct mutation does NOT trigger re-render.')"><span class="opt-letter">A</span> Any function call inside the component</button>
+      <button class="opt-btn" onclick="answer('q28','B','D','Re-renders are triggered by: (1) setState / useState setter called, (2) parent re-renders and passes new props, (3) context value changes. Direct mutation does NOT trigger re-render.')"><span class="opt-letter">B</span> Accessing a prop inside JSX</button>
+      <button class="opt-btn" onclick="answer('q28','C','D','Re-renders are triggered by: (1) setState / useState setter called, (2) parent re-renders and passes new props, (3) context value changes. Direct mutation does NOT trigger re-render.')"><span class="opt-letter">C</span> Mutating a variable directly (not state)</button>
+      <button class="opt-btn" onclick="answer('q28','D','D','Re-renders are triggered by: (1) setState / useState setter called, (2) parent re-renders and passes new props, (3) context value changes. Direct mutation does NOT trigger re-render.')"><span class="opt-letter">D</span> State change, prop change, or context change</button>
+    </div>
+    <div class="explanation" id="q28-exp"></div>
+  </div>
+
+  <!-- Q29 -->
+  <div class="q-card" id="q29">
+    <div class="q-meta">
+      <span class="q-num">Q29</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is a CORS preflight request?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q29','A','C','Before cross-origin requests with non-simple methods (PUT, DELETE, custom headers), the browser sends an HTTP OPTIONS preflight to ask the server if the real request is allowed.')"><span class="opt-letter">A</span> A request to pre-load a cached resource</span></button>
+      <button class="opt-btn" onclick="answer('q29','B','C','Before cross-origin requests with non-simple methods (PUT, DELETE, custom headers), the browser sends an HTTP OPTIONS preflight to ask the server if the real request is allowed.')"><span class="opt-letter">B</span> First request in a WebSocket handshake</button>
+      <button class="opt-btn" onclick="answer('q29','C','C','Before cross-origin requests with non-simple methods (PUT, DELETE, custom headers), the browser sends an HTTP OPTIONS preflight to ask the server if the real request is allowed.')"><span class="opt-letter">C</span> An OPTIONS request asking if the actual request is permitted</button>
+      <button class="opt-btn" onclick="answer('q29','D','C','Before cross-origin requests with non-simple methods (PUT, DELETE, custom headers), the browser sends an HTTP OPTIONS preflight to ask the server if the real request is allowed.')"><span class="opt-letter">D</span> A browser cache validation request</button>
+    </div>
+    <div class="explanation" id="q29-exp"></div>
+  </div>
+
+  <!-- Q30 -->
+  <div class="q-card" id="q30">
+    <div class="q-meta">
+      <span class="q-num">Q30</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is the output of this JavaScript code?</p>
+    <code class="code-block">console.log(<span class="num">1</span>);
+setTimeout(() <span class="kw">=></span> console.log(<span class="num">2</span>), <span class="num">0</span>);
+Promise.resolve().then(() <span class="kw">=></span> console.log(<span class="num">3</span>));
+console.log(<span class="num">4</span>);</code>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q30','A','D','Event loop order: Synchronous (1, 4) → Microtask queue (Promise → 3) → Macrotask queue (setTimeout → 2). Promises are microtasks and run before setTimeout callbacks.')"><span class="opt-letter">A</span> 1, 2, 3, 4</button>
+      <button class="opt-btn" onclick="answer('q30','B','D','Event loop order: Synchronous (1, 4) → Microtask queue (Promise → 3) → Macrotask queue (setTimeout → 2). Promises are microtasks and run before setTimeout callbacks.')"><span class="opt-letter">B</span> 1, 3, 2, 4</button>
+      <button class="opt-btn" onclick="answer('q30','C','D','Event loop order: Synchronous (1, 4) → Microtask queue (Promise → 3) → Macrotask queue (setTimeout → 2). Promises are microtasks and run before setTimeout callbacks.')"><span class="opt-letter">C</span> 1, 4, 2, 3</button>
+      <button class="opt-btn" onclick="answer('q30','D','D','Event loop order: Synchronous (1, 4) → Microtask queue (Promise → 3) → Macrotask queue (setTimeout → 2). Promises are microtasks and run before setTimeout callbacks.')"><span class="opt-letter">D</span> 1, 4, 3, 2</button>
+    </div>
+    <div class="explanation" id="q30-exp"></div>
+  </div>
+
+  <!-- ===== GDB SECTION ===== -->
+  <div class="section-header">
+    <span class="section-badge gdb-badge">Section 3</span>
+    <span class="section-title">GDB Debugger</span>
+    <div class="section-line"></div>
+  </div>
+
+  <!-- Q31 -->
+  <div class="q-card" id="q31">
+    <div class="q-meta">
+      <span class="q-num">Q31</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">To compile a C program for debugging with GDB, which flag must be passed to gcc?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q31','A','B','-g tells gcc to embed debugging symbols (variable names, line numbers, source info) into the binary. Without -g, GDB cannot show source code or variable names.')"><span class="opt-letter">A</span> <code>-O2</code></button>
+      <button class="opt-btn" onclick="answer('q31','B','B','-g tells gcc to embed debugging symbols (variable names, line numbers, source info) into the binary. Without -g, GDB cannot show source code or variable names.')"><span class="opt-letter">B</span> <code>-g</code></button>
+      <button class="opt-btn" onclick="answer('q31','C','B','-g tells gcc to embed debugging symbols (variable names, line numbers, source info) into the binary. Without -g, GDB cannot show source code or variable names.')"><span class="opt-letter">C</span> <code>-Wall</code></button>
+      <button class="opt-btn" onclick="answer('q31','D','B','-g tells gcc to embed debugging symbols (variable names, line numbers, source info) into the binary. Without -g, GDB cannot show source code or variable names.')"><span class="opt-letter">D</span> <code>-debug</code></button>
+    </div>
+    <div class="explanation" id="q31-exp"></div>
+  </div>
+
+  <!-- Q32 -->
+  <div class="q-card" id="q32">
+    <div class="q-meta">
+      <span class="q-num">Q32</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">In GDB, what is the difference between the <code>next</code> (n) and <code>step</code> (s) commands?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q32','A','C','"next" steps OVER function calls (executes them without entering). "step" steps INTO function calls, descending into the called function\'s code.')"><span class="opt-letter">A</span> next exits the program; step continues it</button>
+      <button class="opt-btn" onclick="answer('q32','B','C','"next" steps OVER function calls (executes them without entering). "step" steps INTO function calls, descending into the called function\'s code.')"><span class="opt-letter">B</span> next runs to next breakpoint; step runs one assembly instruction</button>
+      <button class="opt-btn" onclick="answer('q32','C','C','"next" steps OVER function calls (executes them without entering). "step" steps INTO function calls, descending into the called function\'s code.')"><span class="opt-letter">C</span> next steps over function calls; step steps into them</button>
+      <button class="opt-btn" onclick="answer('q32','D','C','"next" steps OVER function calls (executes them without entering). "step" steps INTO function calls, descending into the called function\'s code.')"><span class="opt-letter">D</span> They are identical — both execute one line</button>
+    </div>
+    <div class="explanation" id="q32-exp"></div>
+  </div>
+
+  <!-- Q33 -->
+  <div class="q-card" id="q33">
+    <div class="q-meta">
+      <span class="q-num">Q33</span>
+      <span class="diff-tag beg">Beginner</span>
+      <span class="q-points">1 pt</span>
+    </div>
+    <p class="q-text">Which GDB command prints the value of a variable (e.g., variable <code>x</code>)?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q33','A','B','print x (or p x) evaluates and displays the value of x. You can also print expressions: p x+1, p *ptr, p arr[0].')"><span class="opt-letter">A</span> show x</button>
+      <button class="opt-btn" onclick="answer('q33','B','B','print x (or p x) evaluates and displays the value of x. You can also print expressions: p x+1, p *ptr, p arr[0].')"><span class="opt-letter">B</span> print x</button>
+      <button class="opt-btn" onclick="answer('q33','C','B','print x (or p x) evaluates and displays the value of x. You can also print expressions: p x+1, p *ptr, p arr[0].')"><span class="opt-letter">C</span> display x only</button>
+      <button class="opt-btn" onclick="answer('q33','D','B','print x (or p x) evaluates and displays the value of x. You can also print expressions: p x+1, p *ptr, p arr[0].')"><span class="opt-letter">D</span> echo x</button>
+    </div>
+    <div class="explanation" id="q33-exp"></div>
+  </div>
+
+  <!-- Q34 -->
+  <div class="q-card" id="q34">
+    <div class="q-meta">
+      <span class="q-num">Q34</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What does a <em>watchpoint</em> do in GDB?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q34','A','C','Watchpoints (watch x) pause execution whenever a variable\'s VALUE changes — without you having to know where it\'s modified. Powerful for tracking down unexpected mutations.')"><span class="opt-letter">A</span> Pauses execution when a function is called</button>
+      <button class="opt-btn" onclick="answer('q34','B','C','Watchpoints (watch x) pause execution whenever a variable\'s VALUE changes — without you having to know where it\'s modified. Powerful for tracking down unexpected mutations.')"><span class="opt-letter">B</span> Sets a breakpoint at a memory address</button>
+      <button class="opt-btn" onclick="answer('q34','C','C','Watchpoints (watch x) pause execution whenever a variable\'s VALUE changes — without you having to know where it\'s modified. Powerful for tracking down unexpected mutations.')"><span class="opt-letter">C</span> Pauses execution when a variable's value changes</button>
+      <button class="opt-btn" onclick="answer('q34','D','C','Watchpoints (watch x) pause execution whenever a variable\'s VALUE changes — without you having to know where it\'s modified. Powerful for tracking down unexpected mutations.')"><span class="opt-letter">D</span> Monitors CPU usage during execution</button>
+    </div>
+    <div class="explanation" id="q34-exp"></div>
+  </div>
+
+  <!-- Q35 -->
+  <div class="q-card" id="q35">
+    <div class="q-meta">
+      <span class="q-num">Q35</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">Which GDB command shows the call stack (list of active function frames)?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q35','A','B','"backtrace" (or bt) shows the call stack. Each frame shows function name, arguments, source file, and line. "frame N" switches to a specific frame to inspect its local variables.')"><span class="opt-letter">A</span> stack</button>
+      <button class="opt-btn" onclick="answer('q35','B','B','"backtrace" (or bt) shows the call stack. Each frame shows function name, arguments, source file, and line. "frame N" switches to a specific frame to inspect its local variables.')"><span class="opt-letter">B</span> backtrace</button>
+      <button class="opt-btn" onclick="answer('q35','C','B','"backtrace" (or bt) shows the call stack. Each frame shows function name, arguments, source file, and line. "frame N" switches to a specific frame to inspect its local variables.')"><span class="opt-letter">C</span> frames</button>
+      <button class="opt-btn" onclick="answer('q35','D','B','"backtrace" (or bt) shows the call stack. Each frame shows function name, arguments, source file, and line. "frame N" switches to a specific frame to inspect its local variables.')"><span class="opt-letter">D</span> callstack</button>
+    </div>
+    <div class="explanation" id="q35-exp"></div>
+  </div>
+
+  <!-- Q36 fill-blank -->
+  <div class="q-card" id="q36">
+    <div class="q-meta">
+      <span class="q-num">Q36</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">Fill in the blank: The GDB command <code>break main.c:42</code> sets a breakpoint at line ______ of file main.c.</p>
+    <input class="fill-input" id="q36-input" type="text" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkFill('q36',['42','line 42'])">
+    <br>
+    <button class="check-btn" id="q36-btn" onclick="checkFill('q36',['42','line 42'])">Check Answer</button>
+    <div class="explanation" id="q36-exp"></div>
+  </div>
+
+  <!-- Q37 -->
+  <div class="q-card" id="q37">
+    <div class="q-meta">
+      <span class="q-num">Q37</span>
+      <span class="diff-tag int">Intermediate</span>
+      <span class="q-points">2 pts</span>
+    </div>
+    <p class="q-text">What does the GDB command <code>info registers</code> show?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q37','A','C','"info registers" shows all CPU register values (rax, rbx, rip, rsp, rflags, etc.) at the current execution point. Essential for low-level debugging and understanding program state.')"><span class="opt-letter">A</span> Registered breakpoints in the session</button>
+      <button class="opt-btn" onclick="answer('q37','B','C','"info registers" shows all CPU register values (rax, rbx, rip, rsp, rflags, etc.) at the current execution point. Essential for low-level debugging and understanding program state.')"><span class="opt-letter">B</span> List of registered library functions</button>
+      <button class="opt-btn" onclick="answer('q37','C','C','"info registers" shows all CPU register values (rax, rbx, rip, rsp, rflags, etc.) at the current execution point. Essential for low-level debugging and understanding program state.')"><span class="opt-letter">C</span> Current CPU register values</button>
+      <button class="opt-btn" onclick="answer('q37','D','C','"info registers" shows all CPU register values (rax, rbx, rip, rsp, rflags, etc.) at the current execution point. Essential for low-level debugging and understanding program state.')"><span class="opt-letter">D</span> Memory addresses of global variables</button>
+    </div>
+    <div class="explanation" id="q37-exp"></div>
+  </div>
+
+  <!-- Q38 -->
+  <div class="q-card" id="q38">
+    <div class="q-meta">
+      <span class="q-num">Q38</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is a <em>core dump</em> and how do you load one in GDB?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q38','A','C','A core dump (core file) is a snapshot of a process\'s memory at crash time. Load with: gdb ./program core. This lets you inspect state, backtrace, and variables exactly as they were at the crash.')"><span class="opt-letter">A</span> A backup copy of source code; load with: gdb --restore core</button>
+      <button class="opt-btn" onclick="answer('q38','B','C','A core dump (core file) is a snapshot of a process\'s memory at crash time. Load with: gdb ./program core. This lets you inspect state, backtrace, and variables exactly as they were at the crash.')"><span class="opt-letter">B</span> A CPU usage log; load with: gdb core --analyze</button>
+      <button class="opt-btn" onclick="answer('q38','C','C','A core dump (core file) is a snapshot of a process\'s memory at crash time. Load with: gdb ./program core. This lets you inspect state, backtrace, and variables exactly as they were at the crash.')"><span class="opt-letter">C</span> A memory snapshot at crash time; load with: gdb ./program core</button>
+      <button class="opt-btn" onclick="answer('q38','D','C','A core dump (core file) is a snapshot of a process\'s memory at crash time. Load with: gdb ./program core. This lets you inspect state, backtrace, and variables exactly as they were at the crash.')"><span class="opt-letter">D</span> A heap allocation log; load with: gdb --heap core</button>
+    </div>
+    <div class="explanation" id="q38-exp"></div>
+  </div>
+
+  <!-- Q39 -->
+  <div class="q-card" id="q39">
+    <div class="q-meta">
+      <span class="q-num">Q39</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What does the GDB command <code>x/10wx $rsp</code> do?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q39','A','C','x is the examine memory command. x/10wx $rsp: examine 10 (count) words (w=4 bytes) in hex (x format) starting at the stack pointer ($rsp). Used to inspect stack contents.')"><span class="opt-letter">A</span> Prints 10 lines of assembly at the stack pointer</button>
+      <button class="opt-btn" onclick="answer('q39','B','C','x is the examine memory command. x/10wx $rsp: examine 10 (count) words (w=4 bytes) in hex (x format) starting at the stack pointer ($rsp). Used to inspect stack contents.')"><span class="opt-letter">B</span> Sets a watchpoint for the rsp register</button>
+      <button class="opt-btn" onclick="answer('q39','C','C','x is the examine memory command. x/10wx $rsp: examine 10 (count) words (w=4 bytes) in hex (x format) starting at the stack pointer ($rsp). Used to inspect stack contents.')"><span class="opt-letter">C</span> Examines 10 words of memory at the stack pointer in hex</button>
+      <button class="opt-btn" onclick="answer('q39','D','C','x is the examine memory command. x/10wx $rsp: examine 10 (count) words (w=4 bytes) in hex (x format) starting at the stack pointer ($rsp). Used to inspect stack contents.')"><span class="opt-letter">D</span> Deletes 10 breakpoints starting from the stack pointer</button>
+    </div>
+    <div class="explanation" id="q39-exp"></div>
+  </div>
+
+  <!-- Q40 -->
+  <div class="q-card" id="q40">
+    <div class="q-meta">
+      <span class="q-num">Q40</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">In GDB, how would you set a conditional breakpoint that only triggers when variable <code>i</code> equals <code>99</code>?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q40','A','C','Conditional breakpoints: break myfile.c:20 if i==99 OR set an unconditional break first, then: condition 1 i==99 (where 1 is the breakpoint number). Useful for loop debugging.')"><span class="opt-letter">A</span> <code>break if i==99</code></button>
+      <button class="opt-btn" onclick="answer('q40','B','C','Conditional breakpoints: break myfile.c:20 if i==99 OR set an unconditional break first, then: condition 1 i==99 (where 1 is the breakpoint number). Useful for loop debugging.')"><span class="opt-letter">B</span> <code>watch i==99</code></button>
+      <button class="opt-btn" onclick="answer('q40','C','C','Conditional breakpoints: break myfile.c:20 if i==99 OR set an unconditional break first, then: condition 1 i==99 (where 1 is the breakpoint number). Useful for loop debugging.')"><span class="opt-letter">C</span> <code>break line_num if i==99</code></button>
+      <button class="opt-btn" onclick="answer('q40','D','C','Conditional breakpoints: break myfile.c:20 if i==99 OR set an unconditional break first, then: condition 1 i==99 (where 1 is the breakpoint number). Useful for loop debugging.')"><span class="opt-letter">D</span> <code>break --when i==99</code></button>
+    </div>
+    <div class="explanation" id="q40-exp"></div>
+  </div>
+
+  <!-- Q41 -->
+  <div class="q-card" id="q41">
+    <div class="q-meta">
+      <span class="q-num">Q41</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is <em>reverse debugging</em> in GDB and which command enables it?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q41','A','B','record starts recording program execution. Then reverse-next / reverse-step / reverse-continue let you execute BACKWARDS in time — invaluable for finding the root cause of a bug by rewinding to before it happened.')"><span class="opt-letter">A</span> Running the program in reverse order; enabled with <code>set reverse on</code></button>
+      <button class="opt-btn" onclick="answer('q41','B','B','record starts recording program execution. Then reverse-next / reverse-step / reverse-continue let you execute BACKWARDS in time — invaluable for finding the root cause of a bug by rewinding to before it happened.')"><span class="opt-letter">B</span> Re-executing backwards after recording; enabled with <code>record</code></button>
+      <button class="opt-btn" onclick="answer('q41','C','B','record starts recording program execution. Then reverse-next / reverse-step / reverse-continue let you execute BACKWARDS in time — invaluable for finding the root cause of a bug by rewinding to before it happened.')"><span class="opt-letter">C</span> Debugging by reading assembly backwards; no special command</button>
+      <button class="opt-btn" onclick="answer('q41','D','B','record starts recording program execution. Then reverse-next / reverse-step / reverse-continue let you execute BACKWARDS in time — invaluable for finding the root cause of a bug by rewinding to before it happened.')"><span class="opt-letter">D</span> Attaching to a crashed process; enabled with <code>attach --reverse</code></button>
+    </div>
+    <div class="explanation" id="q41-exp"></div>
+  </div>
+
+  <!-- Q42 -->
+  <div class="q-card" id="q42">
+    <div class="q-meta">
+      <span class="q-num">Q42</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">What is the GDB Python API used for?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q42','A','C','The GDB Python API lets you write Python scripts that control GDB, create custom pretty-printers for complex types (like STL containers), define new GDB commands, and automate repetitive debugging tasks.')"><span class="opt-letter">A</span> Compiling Python code with debug symbols</button>
+      <button class="opt-btn" onclick="answer('q42','B','C','The GDB Python API lets you write Python scripts that control GDB, create custom pretty-printers for complex types (like STL containers), define new GDB commands, and automate repetitive debugging tasks.')"><span class="opt-letter">B</span> Running Python programs inside GDB's address space</button>
+      <button class="opt-btn" onclick="answer('q42','C','C','The GDB Python API lets you write Python scripts that control GDB, create custom pretty-printers for complex types (like STL containers), define new GDB commands, and automate repetitive debugging tasks.')"><span class="opt-letter">C</span> Extending GDB with custom commands, pretty-printers, and automation</button>
+      <button class="opt-btn" onclick="answer('q42','D','C','The GDB Python API lets you write Python scripts that control GDB, create custom pretty-printers for complex types (like STL containers), define new GDB commands, and automate repetitive debugging tasks.')"><span class="opt-letter">D</span> Converting Python scripts to C for faster debugging</button>
+    </div>
+    <div class="explanation" id="q42-exp"></div>
+  </div>
+
+  <!-- Q43 fill-blank -->
+  <div class="q-card" id="q43">
+    <div class="q-meta">
+      <span class="q-num">Q43</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">Fill in the blank: The GDB command <code>disassemble main</code> shows the ______ code of the main function.</p>
+    <input class="fill-input" id="q43-input" type="text" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkFill('q43',['assembly','disassembled','disassembly','assembly language','asm'])">
+    <br>
+    <button class="check-btn" id="q43-btn" onclick="checkFill('q43',['assembly','disassembled','disassembly','assembly language','asm'])">Check Answer</button>
+    <div class="explanation" id="q43-exp"></div>
+  </div>
+
+  <!-- Q44 -->
+  <div class="q-card" id="q44">
+    <div class="q-meta">
+      <span class="q-num">Q44</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">Which GDB command attaches the debugger to an already-running process by its PID?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q44','A','C','"attach PID" connects GDB to a running process without restarting it. Requires appropriate permissions (same user or root). Use "detach" to disconnect without killing the process.')"><span class="opt-letter">A</span> connect [PID]</button>
+      <button class="opt-btn" onclick="answer('q44','B','C','"attach PID" connects GDB to a running process without restarting it. Requires appropriate permissions (same user or root). Use "detach" to disconnect without killing the process.')"><span class="opt-letter">B</span> inject [PID]</button>
+      <button class="opt-btn" onclick="answer('q44','C','C','"attach PID" connects GDB to a running process without restarting it. Requires appropriate permissions (same user or root). Use "detach" to disconnect without killing the process.')"><span class="opt-letter">C</span> attach [PID]</button>
+      <button class="opt-btn" onclick="answer('q44','D','C','"attach PID" connects GDB to a running process without restarting it. Requires appropriate permissions (same user or root). Use "detach" to disconnect without killing the process.')"><span class="opt-letter">D</span> link [PID]</button>
+    </div>
+    <div class="explanation" id="q44-exp"></div>
+  </div>
+
+  <!-- Q45 -->
+  <div class="q-card" id="q45">
+    <div class="q-meta">
+      <span class="q-num">Q45</span>
+      <span class="diff-tag adv">Advanced</span>
+      <span class="q-points">3 pts</span>
+    </div>
+    <p class="q-text">When debugging a segfault, what is typically the FIRST GDB command to run after the crash?</p>
+    <div class="options">
+      <button class="opt-btn" onclick="answer('q45','A','C','After a segfault, "backtrace" (bt) immediately shows WHERE the crash happened — the call stack with function names, arguments, file names, and line numbers. Then inspect the frame to find the bad pointer.')"><span class="opt-letter">A</span> <code>restart</code></button>
+      <button class="opt-btn" onclick="answer('q45','B','C','After a segfault, "backtrace" (bt) immediately shows WHERE the crash happened — the call stack with function names, arguments, file names, and line numbers. Then inspect the frame to find the bad pointer.')"><span class="opt-letter">B</span> <code>info memory</code></button>
+      <button class="opt-btn" onclick="answer('q45','C','C','After a segfault, "backtrace" (bt) immediately shows WHERE the crash happened — the call stack with function names, arguments, file names, and line numbers. Then inspect the frame to find the bad pointer.')"><span class="opt-letter">C</span> <code>backtrace</code></button>
+      <button class="opt-btn" onclick="answer('q45','D','C','After a segfault, "backtrace" (bt) immediately shows WHERE the crash happened — the call stack with function names, arguments, file names, and line numbers. Then inspect the frame to find the bad pointer.')"><span class="opt-letter">D</span> <code>print $rip</code></button>
+    </div>
+    <div class="explanation" id="q45-exp"></div>
+  </div>
+
+  <button id="submit-all" onclick="submitAll()">▶ &nbsp; Submit All &amp; See Final Grade</button>
+
+  <div id="result-panel">
+    <div id="result-grade"></div>
+    <div id="result-msg"></div>
+    <div id="breakdown">
+      <div class="breakdown-item">
+        <span class="bval" id="bash-score" style="color:var(--accent-bash)">—</span>
+        <span class="blbl">Bash</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="bval" id="web-score" style="color:var(--accent-web)">—</span>
+        <span class="blbl">Web Dev</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="bval" id="gdb-score" style="color:var(--accent-gdb)">—</span>
+        <span class="blbl">GDB</span>
+      </div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">↺ &nbsp; Try Again</button>
+  </div>
+
+</div>
+
+<script>
+  // State
+  const state = {
+    score: 0, correct: 0, wrong: 0,
+    answered: new Set(),
+    totalQ: 45,
+    points: {
+      q1:1, q2:1, q3:1, q4:1, q5:2, q6:2, q7:2, q8:2,
+      q9:3, q10:3, q11:3, q12:3, q13:3, q14:3, q15:3,
+      q16:1, q17:1, q18:1, q19:2, q20:2, q21:2, q22:2,
+      q23:2, q24:3, q25:3, q26:3, q27:3, q28:3, q29:3, q30:3,
+      q31:1, q32:1, q33:1, q34:2, q35:2, q36:2, q37:2,
+      q38:3, q39:3, q40:3, q41:3, q42:3, q43:3, q44:3, q45:3
+    },
+    sections: {
+      bash: {qs: ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15'], score: 0, max: 0},
+      web:  {qs: ['q16','q17','q18','q19','q20','q21','q22','q23','q24','q25','q26','q27','q28','q29','q30'], score: 0, max: 0},
+      gdb:  {qs: ['q31','q32','q33','q34','q35','q36','q37','q38','q39','q40','q41','q42','q43','q44','q45'], score: 0, max: 0}
+    }
+  };
+
+  // Init section max
+  for (const [sname, s] of Object.entries(state.sections)) {
+    s.max = s.qs.reduce((a, q) => a + (state.points[q] || 0), 0);
+  }
+  const totalMax = Object.values(state.sections).reduce((a, s) => a + s.max, 0);
+
+  function getSectionForQ(qid) {
+    for (const [k, v] of Object.entries(state.sections)) {
+      if (v.qs.includes(qid)) return k;
+    }
+    return null;
+  }
+
+  function answer(qid, chosen, correct, explanation) {
+    if (state.answered.has(qid)) return;
+    state.answered.add(qid);
+
+    const card = document.getElementById(qid);
+    const btns = card.querySelectorAll('.opt-btn');
+    const letters = ['A','B','C','D'];
+    const pts = state.points[qid] || 1;
+
+    btns.forEach((btn, i) => {
+      btn.disabled = true;
+      const l = letters[i];
+      if (l === correct) btn.classList.add('correct');
+      else if (l === chosen && l !== correct) btn.classList.add('wrong');
+    });
+
+    const isCorrect = chosen === correct;
+    if (isCorrect) {
+      card.classList.add('answered-correct');
+      state.score += pts;
+      state.correct++;
+      const sec = getSectionForQ(qid);
+      if (sec) state.sections[sec].score += pts;
+    } else {
+      card.classList.add('answered-wrong');
+      state.wrong++;
+    }
+
+    showExp(qid, explanation, isCorrect);
+    updateUI();
+  }
+
+  function checkFill(qid, answers) {
+    if (state.answered.has(qid)) return;
+    const input = document.getElementById(qid + '-input');
+    const btn = document.getElementById(qid + '-btn');
+    const val = input.value.trim().toLowerCase();
+    const isCorrect = answers.some(a => val === a.toLowerCase() || val.includes(a.toLowerCase()));
+
+    state.answered.add(qid);
+    const pts = state.points[qid] || 1;
+
+    if (isCorrect) {
+      input.classList.add('correct');
+      document.getElementById(qid).classList.add('answered-correct');
+      state.score += pts;
+      state.correct++;
+      const sec = getSectionForQ(qid);
+      if (sec) state.sections[sec].score += pts;
+      showExp(qid, `✓ Correct! The answer is: <strong>${answers[0]}</strong>.`, true);
+    } else {
+      input.classList.add('wrong');
+      document.getElementById(qid).classList.add('answered-wrong');
+      state.wrong++;
+      showExp(qid, `✗ The correct answer is: <strong>${answers[0]}</strong>.`, false);
+    }
+
+    btn.disabled = true;
+    input.disabled = true;
+    updateUI();
+  }
+
+  function showExp(qid, text, correct) {
+    const exp = document.getElementById(qid + '-exp');
+    const icon = correct ? '✓ ' : '✗ ';
+    const color = correct ? 'var(--correct)' : 'var(--wrong)';
+    exp.style.borderLeftColor = color;
+    exp.innerHTML = `<span style="color:${color};font-weight:700;">${icon}</span>${text}`;
+    exp.classList.add('show');
+  }
+
+  function updateUI() {
+    document.getElementById('score-val').textContent = state.score;
+    document.getElementById('correct-val').textContent = state.correct;
+    document.getElementById('wrong-val').textContent = state.wrong;
+    document.getElementById('remain-val').textContent = state.totalQ - state.answered.size;
+    const pct = (state.answered.size / state.totalQ) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+
+  function submitAll() {
+    // Force unanswered fill-blanks to show as wrong
+    ['q10','q15','q27','q36','q43'].forEach(qid => {
+      if (!state.answered.has(qid)) {
+        const input = document.getElementById(qid + '-input');
+        if (input && !input.disabled) checkFill(qid, ['__no_answer__']);
+      }
+    });
+
+    const pct = totalMax > 0 ? Math.round((state.score / totalMax) * 100) : 0;
+    let grade, msg;
+    if (pct >= 90) { grade = 'A+'; msg = 'Outstanding! You have mastered all three domains.'; }
+    else if (pct >= 80) { grade = 'A'; msg = 'Excellent work. Strong command across Bash, Web Dev & GDB.'; }
+    else if (pct >= 70) { grade = 'B'; msg = 'Good job! Review your weaker sections for mastery.'; }
+    else if (pct >= 60) { grade = 'C'; msg = 'Passing. Revisit the advanced topics in each section.'; }
+    else if (pct >= 50) { grade = 'D'; msg = 'Keep studying! Focus on fundamentals before advanced topics.'; }
+    else { grade = 'F'; msg = 'Don\'t give up — revisit the basics and try again!'; }
+
+    const gradeColors = {'A+':'var(--correct)','A':'var(--correct)','B':'var(--warn)','C':'var(--warn)','D':'var(--accent-web)','F':'var(--wrong)'};
+    const panel = document.getElementById('result-panel');
+    const gradeEl = document.getElementById('result-grade');
+    gradeEl.textContent = grade + ' (' + pct + '%)';
+    gradeEl.style.color = gradeColors[grade] || 'var(--text)';
+    document.getElementById('result-msg').textContent = msg + ' Score: ' + state.score + '/' + totalMax;
+
+    const s = state.sections;
+    document.getElementById('bash-score').textContent = s.bash.score + '/' + s.bash.max;
+    document.getElementById('web-score').textContent  = s.web.score  + '/' + s.web.max;
+    document.getElementById('gdb-score').textContent  = s.gdb.score  + '/' + s.gdb.max;
+
+    panel.classList.add('show');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('submit-all').style.display = 'none';
+  }
+
+  function resetAll() {
+    location.reload();
+  }
+</script>
+</body>
+</html>

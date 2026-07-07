@@ -1,0 +1,6 @@
+git An Introduction to Version Management Bhaskaran Raman Room 406, KR Building Department of CSE, IIT Bombay http://www.cse.iitb.ac.in/~br Version Management: What and Why Manage multiple revisions of code ● Individually project (rare) or collaborative in a team – Develop independently, merge consistently, maintain – consistent revisions Can be used for documents, reports ● git versus svn svn:
+● Needs a central repository – Separate from working copy – git:
+● Each working copy has a full git – repository Each user can work and manage ● revisions independently User can interact with other users – independent of central repo.
+Creating a (local) git repository:
+git init git add, status, commit, reset Using .gitignore git log git revert git checkout git branch, merge Using gitk Remote repository:
+clone, pull, fetch, push Other git commands: tag, config

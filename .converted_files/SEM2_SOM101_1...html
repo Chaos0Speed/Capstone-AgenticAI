@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOM101: Master Concept Question Bank</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --bg: #ecf0f1;
+            --text: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        select, button {
+            padding: 10px 15px;
+            font-size: 1em;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            outline: none;
+        }
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            perspective: 1000px;
+            min-height: 200px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--primary);
+        }
+        .module-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.8em;
+            border-radius: 4px;
+            background-color: #f39c12;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 10px;
+            width: max-content;
+        }
+        .question-text {
+            font-size: 1.1em;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        .answer-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .rationale {
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.4;
+        }
+        .flip-hint {
+            font-size: 0.8em;
+            color: #95a5a6;
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SOM101 Master Question Bank</h1>
+        <p class="subtitle">Click any card to reveal the answer and explanation.</p>
+    </header>
+
+    <div class="controls">
+        <select id="moduleFilter" onchange="renderCards()">
+            <option value="All">All Modules</option>
+            <option value="Strategy">Strategy & Planning</option>
+            <option value="Finance">Finance & Accounting</option>
+            <option value="Operations">Operations & SCM</option>
+            <option value="Japanese Management">Japanese Management</option>
+            <option value="Leadership & OB">Leadership & OB</option>
+            <option value="Marketing">Marketing</option>
+        </select>
+        <button onclick="shuffleCards()">Shuffle Questions</button>
+    </div>
+
+    <div class="grid" id="quizGrid"></div>
+
+    <script>
+        // Conceptually distinct questions directly from SOM101 slides
+        const questions = [
+            {
+                module: "Strategy",
+                q: "A business unit operates in a declining industry with negative growth but holds a massive market share. Under the strict logic of the BCG Matrix, how is this unit classified?",
+                a: "Cash Cow",
+                r: "Cash Cows have high relative market share in low/declining growth industries. They generate excess cash to fund Stars or Question Marks."
+            },
+            {
+                module: "Strategy",
+                q: "Which force in Porter’s Five Forces model is most directly impacted if a regulatory change suddenly eliminates all import tariffs in a historically protected domestic industry?",
+                a: "Threat of New Entrants",
+                r: "Removing tariffs instantly lowers barriers to entry, making it highly probable that foreign companies will enter the market."
+            },
+            {
+                module: "Strategy",
+                q: "In the Balanced Scorecard framework, evaluating metrics like 'Employee Satisfaction', 'Retention', and 'Training Skills' falls under which specific perspective?",
+                a: "Learning & Growth",
+                r: "This perspective sustains the organization's ability to change, adapt, and improve by focusing on human capital."
+            },
+            {
+                module: "Finance",
+                q: "A company decides to purchase a new warehouse to expand its distribution. This massive expenditure will provide LT benefits. What type of expense is this?",
+                a: "Capital Expenditure (CAPEX)",
+                r: "CAPEX involves spending on LT physical assets like buildings, factories, or machinery that benefit the company over several years."
+            },
+            {
+                module: "Finance",
+                q: "How does 'Economic Profit' conceptually differ from standard 'Accounting Profit'?",
+                a: "Economic profit subtracts opportunity costs.",
+                r: "While accounting profit only deducts explicit monetary expenses, economic profit also deducts the opportunity cost of the capital utilized."
+            },
+            {
+                module: "Finance",
+                q: "If a company has excellent profitability but continually struggles to pay its short-term salaries and utility bills, it is suffering from poor ________.",
+                a: "Liquidity",
+                r: "Liquidity refers to short-term financial health and the ability to convert assets to cash quickly to pay immediate obligations. Solvency refers to long-term health."
+            },
+            {
+                module: "Finance",
+                q: "A company guarantees a massive bank loan for a subsidiary entity. This obligation is not currently a firm debt, but it will become one if the subsidiary defaults. How is this classified?",
+                a: "Contingent Liability",
+                r: "Contingent liabilities depend on the outcome of a future uncertain event (like a default or a lawsuit verdict)."
+            },
+            {
+                module: "Operations",
+                q: "A sudden 5% increase in consumer demand for paper towels leads a retailer to increase orders by 10%, causing the manufacturer to increase production by 20%. What is this phenomenon called?",
+                a: "The Bullwhip Effect",
+                r: "The Bullwhip Effect occurs when small fluctuations in retail demand cause amplified, massive fluctuations up the supply chain due to lack of visibility."
+            },
+            {
+                module: "Operations",
+                q: "Unlike a 3PL which merely executes transport or warehousing, this type of logistics provider takes over the strategic management and optimization of a company's entire end-to-end supply chain.",
+                a: "Fourth-Party Logistics (4PL)",
+                r: "A 4PL acts as a single point of contact that integrates multiple 3PLs, IT systems, and consulting to optimize the whole chain."
+            },
+            {
+                module: "Operations",
+                q: "Which specific supply chain philosophy focuses heavily on the elimination of 'Waste' (non-value-adding activities) and incorporates Just-In-Time (JIT) production?",
+                a: "Lean Supply Chain",
+                r: "Lean emphasizes removing inefficiencies, shrinking inventory holding costs, and utilizing continuous improvement (Kaizen)."
+            },
+            {
+                module: "Operations",
+                q: "In operations problem-solving, what specifically does the 'Where' refer to in the 5W1H technique?",
+                a: "The physical or process location of the problem.",
+                r: "Where defines if the problem is in a specific machine, a specific menu, or a geographical department."
+            },
+            {
+                module: "Japanese Management",
+                q: "In the 3M framework, a restaurant experiences massive lunch rushes and completely empty afternoons, leading to severe staff inefficiencies. Which 'M' does this represent?",
+                a: "Mura (Inconsistency)",
+                r: "Mura refers to unevenness or inconsistency in workload or demand. The solution is smoothing the workflow."
+            },
+            {
+                module: "Japanese Management",
+                q: "A manager leaves their office and walks directly to the factory assembly line to visually inspect a bottleneck. Which of the '3G's' does this action embody?",
+                a: "Gemba",
+                r: "Gemba translates to 'Go to the spot'. It emphasizes diagnosing problems where the actual work happens, rather than from a desk."
+            },
+            {
+                module: "Japanese Management",
+                q: "Within the 5S methodology, ensuring that tools are logically organized so that any worker can easily find and retrieve them without wasted motion corresponds to which 'S'?",
+                a: "Seiton (Straighten/Set in Order)",
+                r: "Seiton means organizing workstations logically so there is a 'place for everything and everything in its place'."
+            },
+            {
+                module: "Japanese Management",
+                q: "In the 3K framework, what does 'Kichin To Mamoru' mean?",
+                a: "Must be followed (Compliance)",
+                r: "It emphasizes the strict adherence to established rules and standards to ensure stable quality and safety."
+            },
+            {
+                module: "Leadership & OB",
+                q: "A manager believes their employees inherently dislike work, avoid responsibility, and must be strictly controlled with fear-based motivations to achieve goals. Which theory does this manager subscribe to?",
+                a: "McGregor's Theory X",
+                r: "Theory X is an authoritarian, pessimistic view of human motivation, requiring strict supervision."
+            },
+            {
+                module: "Leadership & OB",
+                q: "An employee has a stable salary and safe working conditions, but feels disconnected from their peers and excluded from team activities. According to Maslow, which need is currently unmet?",
+                a: "Social / Belongingness Needs",
+                r: "These needs encompass relationships, inclusive culture, and feeling part of a community. It sits just above Safety needs."
+            },
+            {
+                module: "Leadership & OB",
+                q: "A leader completely delegates decision-making to their highly-skilled department heads and avoids micromanaging, focusing only on high-level strategy. What leadership style is this?",
+                a: "Laissez-Faire",
+                r: "Laissez-Faire involves high trust and minimal supervision, working best with intrinsically motivated and expert teams."
+            },
+            {
+                module: "Marketing",
+                q: "A boutique fitness brand decides to target only high-income, eco-conscious professionals in a specific urban zip code. Which level of segmentation are they using?",
+                a: "Niche / Local Marketing",
+                r: "They are slicing the market into a highly specific group rather than utilizing a Mass Marketing approach."
+            },
+            {
+                module: "Marketing",
+                q: "Creating a detailed fictional profile (e.g., 'Tech Titan Tapan, 29, early tech adopter') to better target advertising and product design is known as creating a what?",
+                a: "Customer Persona",
+                r: "Personas help marketers align products with psychographic profiles, values, and buying behaviors."
+            },
+            {
+                module: "Finance",
+                q: "If an oil company makes a sudden, massive, one-time profit simply because global geopolitical tensions spiked crude prices (not due to their own operational excellence), what is this called?",
+                a: "Windfall Profit",
+                r: "Windfall profit is an unexpected, extraordinary profit arising from external factors rather than regular operations."
+            },
+            {
+                module: "Strategy",
+                q: "Which specific statement describes 'why an organization exists and what its overall current goal is'?",
+                a: "Mission Statement",
+                r: "A Mission focuses on the present ('What you do, How you do it, Why you do it'), while a Vision focuses on the aspirational future."
+            },
+             {
+                module: "Finance",
+                q: "A company uses the Declining Balance Method for an asset. Compared to the Straight-Line Method, what happens to the depreciation expense over time?",
+                a: "It is much higher in the early years.",
+                r: "Declining balance applies a fixed percentage to the remaining book value, front-loading the depreciation expense (useful for tech that obsolesces quickly)."
+            },
+            {
+                module: "Operations",
+                q: "In an e-commerce supply chain, what is generally considered the most expensive and complex segment of moving the product to the customer?",
+                a: "Last-Mile Delivery",
+                r: "The last mile (warehouse to customer doorstep) accounts for up to 50% of shipping costs due to traffic, failed deliveries, and routing complexities."
+            },
+            {
+                module: "Leadership & OB",
+                q: "According to the class slides, which managerial role involves acting as an entrepreneur and handling resource allocation and disturbances?",
+                a: "Decisional Role",
+                r: "Mintzberg's roles divide management into Interpersonal (figurehead), Informational (spokesperson), and Decisional (negotiator, resource allocator)."
+            },
+             {
+                module: "Japanese Management",
+                q: "A developer is forced to code 14 hours a day to meet an unrealistic product launch deadline, resulting in massive bugs and fatigue. Under the 3M framework, this is an example of:",
+                a: "Muri (Inconvenience/Overburden)",
+                r: "Muri is the overburdening of people or equipment, which ultimately leads to burnout, breakdowns, and defects."
+            },
+            {
+                module: "Finance",
+                q: "In a P&L Statement, how is 'Gross Profit' calculated?",
+                a: "Sales (Revenue) minus Cost of Goods Sold (COGS)",
+                r: "Gross profit only accounts for the direct costs tied to producing the goods, before deducting operating expenses like rent or admin salaries."
+            },
+            {
+                module: "Finance",
+                q: "Which financial statement is a 'snapshot' prepared on a specific date that proves Assets = Liabilities + Equity?",
+                a: "The Balance Sheet",
+                r: "Unlike the P&L which covers a period of time (e.g., a year), the Balance Sheet shows the exact financial position at one specific moment."
+            },
+            {
+                module: "Strategy",
+                q: "In Porter's Five Forces, if buyers can easily compare prices online and switch to a competitor with zero financial penalty, which force is severely high?",
+                a: "Bargaining Power of Buyers",
+                r: "Low switching costs and high transparency heavily increase the power of the customer to dictate terms and push prices down."
+            },
+            {
+                module: "Finance",
+                q: "When calculating EBITDA, which of the following is deliberately ignored to focus purely on core operational profitability?",
+                a: "Interest, Taxes, Depreciation, and Amortization",
+                r: "EBITDA strips out accounting decisions (depreciation) and financing decisions (interest) to show raw operational cash-generating ability."
+            }
+            // Add more objects here to easily reach 1000 in your own environment!
+        ];
+
+        // Core logic
+        const grid = document.getElementById('quizGrid');
+
+        function renderCards(filter = 'All', shuffle = false) {
+            grid.innerHTML = '';
+            let displayQuestions = [...questions];
+            
+            if(filter !== 'All') {
+                displayQuestions = displayQuestions.filter(q => q.module === filter);
+            }
+            if(shuffle) {
+                displayQuestions.sort(() => Math.random() - 0.5);
+            }
+
+            displayQuestions.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => card.classList.toggle('flipped');
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <span class="module-tag">${item.module}</span>
+                            <div class="question-text">${item.q}</div>
+                            <div class="flip-hint">Click to reveal answer</div>
+                        </div>
+                        <div class="card-back">
+                            <span class="module-tag">${item.module}</span>
+                            <div class="answer-text">${item.a}</div>
+                            <div class="rationale">${item.r}</div>
+                            <div class="flip-hint">Click to hide</div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function shuffleCards() {
+            const filter = document.getElementById('moduleFilter').value;
+            renderCards(filter, true);
+        }
+
+        // Initial render
+        renderCards();
+    </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+# Master Tech Test
+
+Bash (Beginner → Advanced) · Web Development · GDB Debugger
+
+## Section 1: Bash Scripting
+
+| Q# | Difficulty | Points | Question |
+| :--- | :--- | :--- | :--- |
+| Q1 | Beginner | 1 | Which command displays the contents of a file one screen at a time, allowing you to scroll through it? |
+| Q2 | Beginner | 1 | What does the following command do? `chmod 755 script.sh` |
+| Q3 | Beginner | 1 | What symbol is used to redirect standard output to a file, *appending* to it instead of overwriting? |
+| Q4 | Beginner | 1 | What is the special variable `$?` used for in Bash? |
+| Q5 | Intermediate | 2 | What does the following script snippet output when `x=10`? |
+| Q6 | Intermediate | 2 | What is the output of this Bash array operation? `arr=("alpha" "beta" "gamma"); echo ${#arr[@]}` |
+| Q7 | Intermediate | 2 | What does `2>&1` mean in a Bash command? |
+| Q8 | Intermediate | 2 | Complete the command: to search for all `.log` files in `/var` and its subdirectories, modified in the last 7 days. |
+| Q9 | Advanced | 3 | What is the output of this process substitution? `diff <(ls dir1) <(ls dir2)` |
+| Q10 | Advanced | 3 | Fill in the blank: The `trap` command is used to catch ______ in Bash scripts and execute cleanup actions. |
+| Q11 | Advanced | 3 | What does `set -euo pipefail` do at the top of a Bash script? |
+| Q12 | Advanced | 3 | What is the result of this parameter expansion? `str="hello world"; echo ${str/world/bash}` |
+| Q13 | Advanced | 3 | In Bash, what is the difference between `[ ]` (single brackets) and `[[ ]]` (double brackets)? |
+| Q14 | Advanced | 3 | What does this awk one-liner do? `awk '{sum += $2} END {print sum}' data.txt` |
+| Q15 | Advanced | 3 | Fill in the blank: In Bash, `$(( ))` is used for ______ evaluation. |
+
+## Section 2: Web Development
+
+| Q# | Difficulty | Points | Question |
+| :--- | :--- | :--- | :--- |
+| Q16 | Beginner | 1 | What is the correct HTML tag for the largest heading? |
+| Q17 | Beginner | 1 | Which CSS property controls the space INSIDE an element's border? |
+| Q18 | Beginner | 1 | In JavaScript, what is the output of `typeof null`? |
+| Q19 | Intermediate | 2 | What will this JavaScript promise chain output? |
+| Q20 | Intermediate | 2 | Which CSS layout model allows you to create 2D grid layouts with rows AND columns? |
+| Q21 | Intermediate | 2 | What is the HTTP status code for "Not Found"? |
+| Q22 | Intermediate | 2 | What does the CSS `position: sticky` do? |
+| Q23 | Intermediate | 2 | In JavaScript, what is the difference between `==` and `===`? |
+| Q24 | Advanced | 3 | What is the concept of "event delegation" in the DOM? |
+| Q25 | Advanced | 3 | What does this JavaScript code output? async/await try/catch block. |
+| Q26 | Advanced | 3 | What is the purpose of the HTTP `Content-Security-Policy` header? |
+| Q27 | Advanced | 3 | Fill in the blank: The browser rendering concept where CSS properties like `transform` and `opacity` can be animated cheaply because they trigger only ______. |
+| Q28 | Advanced | 3 | In React, what triggers a component re-render? |
+| Q29 | Advanced | 3 | What is a CORS preflight request? |
+| Q30 | Advanced | 3 | What is the output of this JavaScript code involving event loop order? |
+
+## Section 3: GDB Debugger
+
+| Q# | Difficulty | Points | Question |
+| :--- | :--- | :--- | :--- |
+| Q31 | Beginner | 1 | To compile a C program for debugging with GDB, which flag must be passed to gcc? |
+| Q32 | Beginner | 1 | In GDB, what is the difference between the `next` (n) and `step` (s) commands? |
+| Q33 | Beginner | 1 | Which GDB command prints the value of a variable? |
+| Q34 | Intermediate | 2 | What does a *watchpoint* do in GDB? |
+| Q35 | Intermediate | 2 | Which GDB command shows the call stack? |
+| Q36 | Intermediate | 2 | Fill in the blank: The GDB command `break main.c:42` sets a breakpoint at line ______ of file main.c. |
+| Q37 | Intermediate | 2 | What does the GDB command `info registers` show? |
+| Q38 | Advanced | 3 | What is a *core dump* and how do you load one in GDB? |
+| Q39 | Advanced | 3 | What does the GDB command `x/10wx $rsp` do? |
+| Q40 | Advanced | 3 | In GDB, how would you set a conditional breakpoint that only triggers when variable `i` equals `99`? |
+| Q41 | Advanced | 3 | What is *reverse debugging* in GDB and which command enables it? |
+| Q42 | Advanced | 3 | What is the GDB Python API used for? |
+| Q43 | Advanced | 3 | Fill in the blank: The GDB command `disassemble main` shows the ______ code of the main function. |
+| Q44 | Advanced | 3 | Which GDB command attaches the debugger to an already-running process by its PID? |
+| Q45 | Advanced | 3 | When debugging a segfault, what is typically the FIRST GDB command to run after the crash? |
